@@ -1,10 +1,9 @@
 import p5 from "p5";
-import { NUM_FILES, NUM_RANKS } from "./constants";
-import { Board } from "./chess/board";
-import Move from "./chess/move";
-import { PieceSide } from "./chess/piece";
-import Pair from "./ds/pair";
-import Game from "./chess/game";
+import { NUM_FILES, NUM_RANKS } from "../shared/constants";
+import Move from "../shared/chess/move";
+import Pair from "../shared/ds/pair";
+import Game from "../shared/chess/game";
+import { generateAllMoves } from "../shared/chess/move-generator";
 
 // These are not constants because in the future I might want
 // these to change as the screen size changes
@@ -54,7 +53,7 @@ new p5((p: p5) => {
           console.log(`clicked on piece: ${new Pair(i, j)}`);
           console.log(`canvas pos: ${canvasPos}`);
 
-          if (game.board.grid[i][j]?.side == game.currentSide) {
+          if (game.board.grid[i][j]?.side == game.board.currentSide) {
             // Clicked on piece!
             currentlyDraggingPos = new Pair(i, j);
             currentlyDraggingOffset = p5.Vector.sub(p.createVector(canvasPos.first, canvasPos.second), p.createVector(p.mouseX, p.mouseY));
@@ -93,7 +92,6 @@ new p5((p: p5) => {
         if (game.board.checkMove(move)) {
           // Move the piece
           game.board.move(move);
-          game.swapPlayer();
         }
       }
 
@@ -108,7 +106,11 @@ new p5((p: p5) => {
       case "x":
         game.board.log();
         break;
-
+      case "z":
+        console.log(generateAllMoves(game.board.grid, game.currentSide));
+        break;
+      case "c":
+        console.log(`Current size: ${game.board.currentSide}`);
       default:
         break;
     }
@@ -190,7 +192,7 @@ new p5((p: p5) => {
       const availablePos = game.board.availableMoves(currentlyDraggingPos);
 
       for (const pos of availablePos) {
-        const canvasPos = coordToCanvasPos(pos);
+        const canvasPos = coordToCanvasPos(pos.to);
         p.fill(0, 255, 0, 100);
         p.noStroke();
         p.ellipse(canvasPos.first, canvasPos.second, PIECE_SIZE / 2);

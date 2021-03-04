@@ -4,8 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "webpack serve",
-    "build": "webpack"
+    "dev-client": "cd client && webpack serve",
+    "build-client": "cd client && webpack",
+    "build-server": "cd server && tsc",
+    "start-server": "cd dist/server/server && node index.js"
   },
   "keywords": [],
   "author": "",

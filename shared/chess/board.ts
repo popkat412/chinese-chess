@@ -1,11 +1,11 @@
-import { NUM_FILES, NUM_RANKS, PIECE_FROM_FEN, STARTING_POSITION_FEN } from "../constants";
+import { NUM_FILES, NUM_RANKS, OPPOSITE_SIDE, PIECE_FROM_FEN, STARTING_POSITION_FEN } from "../constants";
 import Pair from "../ds/pair";
 import create2dArray from "../utilities/2d-array";
 import Move from "./move";
-import { Piece, PieceSide } from "./piece";
+import { Piece, PieceSide, PieceType } from "./piece";
 import { MOVE_GENERATORS } from "./move-generator";
+import { filterPseudoLegalMoves as generateFullyLegalMoves } from "./fully-legal-moves";
 
-interface PieceInfo { position: Pair<number, number>; piece: Piece; }
 
 export type PieceGrid = (Piece | undefined)[][];
 
@@ -18,26 +18,31 @@ export class Board {
   /// However, the pieces may be drawn to the screen differently
   readonly grid: PieceGrid;
 
+  currentSide: PieceSide;
+
   constructor(fen: string = STARTING_POSITION_FEN) {
     this.grid = this.gridFromFen(fen);
+    this.currentSide = PieceSide.Red;
   }
+
 
   log(): void {
     console.table(this.grid.map((v) => v.map((v2) => v2?.type)));
   }
 
-  // Returns true if move is legal
+  // Returns true if move is fully legal
   checkMove(move: Move): boolean {
     for (const available of this.availableMoves(move.from)) {
-      if (move.to.equals(available)) return true;
+      if (move.to.equals(available.to)) return true;
     }
     return false;
   }
 
-  availableMoves(piecePos: Pair<number, number>): Pair<number, number>[] {
+  // This returns fully legal moves
+  availableMoves(piecePos: Pair<number, number>): Move[] {
     const piece = this.grid[piecePos.first][piecePos.second];
     if (piece) {
-      return MOVE_GENERATORS[piece.type](piecePos, this.grid);
+      return generateFullyLegalMoves(this, MOVE_GENERATORS[piece.type](piecePos, this.grid));
     } else {
       return [];
     }
@@ -45,8 +50,37 @@ export class Board {
 
   move(move: Move): void {
     if (move.to.equals(move.from)) return;
+    move.capturedPiece = this.grid[move.to.first][move.to.second];
     this.grid[move.to.first][move.to.second] = this.grid[move.from.first][move.from.second];
     this.grid[move.from.first][move.from.second] = undefined;
+
+    this.swapPlayer();
+  }
+
+  unmove(move: Move): void {
+    if (move.to.equals(move.from)) return;
+    this.grid[move.from.first][move.from.second] = this.grid[move.to.first][move.to.second];
+    this.grid[move.to.first][move.to.second] = move.capturedPiece;
+
+    this.swapPlayer();
+  }
+
+  findPiece(type: PieceType, side: PieceSide): Pair<number, number>[] {
+    let pos: Pair<number, number>[] = [];
+    for (let i = 0; i < NUM_RANKS; i++) {
+      for (let j = 0; j < NUM_FILES; j++) {
+        const piece = this.grid[i][j];
+        if (piece && piece.type == type && piece.side == side) {
+          pos.push(new Pair(i, j));
+        }
+      }
+    }
+
+    return pos;
+  }
+
+  private swapPlayer(): void {
+    this.currentSide = OPPOSITE_SIDE[this.currentSide];
   }
 
   private gridFromFen(fen: string): PieceGrid {

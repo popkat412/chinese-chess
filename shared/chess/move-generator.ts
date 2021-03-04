@@ -2,9 +2,16 @@ import { NUM_FILES, NUM_RANKS } from "../constants";
 import Pair from "../ds/pair";
 import multipleEquals from "../utilities/multiple-equals";
 import { PieceGrid } from "./board";
+import Move from "./move";
 import { PieceSide, PieceType } from "./piece";
 
-function rookGenerator(position: Pair<number, number>, board: PieceGrid): Pair<number, number>[] {
+// IMPORTANT: This only generates pseudo legal moves
+// aka it can allow itself to die when being checked
+// It also doesn't account for king-cannot-meet-king rule
+
+export type MoveGenerator = (position: Pair<number, number>, board: PieceGrid) => Move[];
+
+function rookGenerator(position: Pair<number, number>, board: PieceGrid): Move[] {
 
   const piece = board[position.first][position.second];
   if (!piece) return [];
@@ -36,10 +43,10 @@ function rookGenerator(position: Pair<number, number>, board: PieceGrid): Pair<n
     }
   }
 
-  return moves;
+  return moves.map(v => new Move(position, v));
 }
 
-function blockablePieceGenerator(position: Pair<number, number>, board: PieceGrid, dx: number[], dy: number[], blockX: number[], blockY: number[]): Pair<number, number>[] {
+function blockablePieceGenerator(position: Pair<number, number>, board: PieceGrid, dx: number[], dy: number[], blockX: number[], blockY: number[]): Move[] {
   console.assert(multipleEquals(dx.length, dy.length, blockX.length, blockY.length));
 
   const piece = board[position.first][position.second];
@@ -66,11 +73,11 @@ function blockablePieceGenerator(position: Pair<number, number>, board: PieceGri
     moves.push(new Pair(x, y));
   }
 
-  return moves;
+  return moves.map(v => new Move(position, v));
 
 }
 
-function horseGenerator(position: Pair<number, number>, board: PieceGrid): Pair<number, number>[] {
+function horseGenerator(position: Pair<number, number>, board: PieceGrid): Move[] {
   // * Order is very important!
   const dx = [-1, +1, +2, +2, +1, -1, -2, -2];
   const dy = [-2, -2, -1, +1, +2, +2, +1, -1];
@@ -80,7 +87,7 @@ function horseGenerator(position: Pair<number, number>, board: PieceGrid): Pair<
   return blockablePieceGenerator(position, board, dx, dy, blockX, blockY);
 }
 
-function elephantGenerator(position: Pair<number, number>, board: PieceGrid): Pair<number, number>[] {
+function elephantGenerator(position: Pair<number, number>, board: PieceGrid): Move[] {
   const dx = [-2, +2, +2, -2];
   const dy = [-2, -2, +2, +2];
   const blockX = [-1, +1, +1, -1];
@@ -89,7 +96,7 @@ function elephantGenerator(position: Pair<number, number>, board: PieceGrid): Pa
   return blockablePieceGenerator(position, board, dx, dy, blockX, blockY);
 }
 
-function kingBoxPieceGenerator(position: Pair<number, number>, board: PieceGrid, dx: number[], dy: number[]): Pair<number, number>[] {
+function kingBoxPieceGenerator(position: Pair<number, number>, board: PieceGrid, dx: number[], dy: number[]): Move[] {
   console.assert(dx.length == dy.length);
 
   const piece = board[position.first][position.second];
@@ -110,7 +117,7 @@ function kingBoxPieceGenerator(position: Pair<number, number>, board: PieceGrid,
     moves.push(pair);
   }
 
-  return moves;
+  return moves.map(v => new Move(position, v));
 
 }
 
@@ -125,19 +132,19 @@ function isInsideKingBox(toCheck: Pair<number, number>, side: PieceSide): boolea
   }
 }
 
-function advisorGenerator(position: Pair<number, number>, board: PieceGrid): Pair<number, number>[] {
+function advisorGenerator(position: Pair<number, number>, board: PieceGrid): Move[] {
   const dx = [-1, +1, +1, -1];
   const dy = [-1, -1, +1, +1];
   return kingBoxPieceGenerator(position, board, dx, dy);
 }
 
-function kingGenerator(position: Pair<number, number>, board: PieceGrid): Pair<number, number>[] {
+function kingGenerator(position: Pair<number, number>, board: PieceGrid): Move[] {
   const dx = [0, 1, 0, -1];
   const dy = [-1, 0, 1, 0];
   return kingBoxPieceGenerator(position, board, dx, dy);
 }
 
-function cannonGenerator(position: Pair<number, number>, board: PieceGrid): Pair<number, number>[] {
+function cannonGenerator(position: Pair<number, number>, board: PieceGrid): Move[] {
   const piece = board[position.first][position.second];
   if (!piece) return [];
 
@@ -177,7 +184,7 @@ function cannonGenerator(position: Pair<number, number>, board: PieceGrid): Pair
     }
   }
 
-  return moves;
+  return moves.map(v => new Move(position, v));
 }
 
 function isAcrossRiver(position: Pair<number, number>, side: PieceSide): boolean {
@@ -190,13 +197,13 @@ function isAcrossRiver(position: Pair<number, number>, side: PieceSide): boolean
   }
 }
 
-function pawnGenerator(position: Pair<number, number>, board: PieceGrid): Pair<number, number>[] {
+function pawnGenerator(position: Pair<number, number>, board: PieceGrid): Move[] {
   const piece = board[position.first][position.second];
   if (!piece) return [];
 
   if (isAcrossRiver(position, piece.side)) {
     let dx: number[], dy: number[];
-    let moves: Pair<number, number>[] = [];
+    let moves: Move[] = [];
 
     if (piece.side == PieceSide.Red) { // remember, red is on top
       dx = [0, 1, 0];
@@ -215,7 +222,7 @@ function pawnGenerator(position: Pair<number, number>, board: PieceGrid): Pair<n
       // Check if friendly piece blocking
       if (board[nx][ny]?.side == piece.side) continue;
 
-      moves.push(new Pair(nx, ny));
+      moves.push(new Move(position, new Pair(nx, ny)));
     }
 
     return moves;
@@ -226,12 +233,12 @@ function pawnGenerator(position: Pair<number, number>, board: PieceGrid): Pair<n
     if (board[nx][ny]) {
       return [];
     } else {
-      return [new Pair(nx, ny)];
+      return [new Move(position, new Pair(nx, ny))];
     }
   }
 }
 
-export const MOVE_GENERATORS: { [k in PieceType]: (position: Pair<number, number>, board: PieceGrid) => Pair<number, number>[] } = {
+export const MOVE_GENERATORS: { [k in PieceType]: MoveGenerator } = {
   Rook: rookGenerator,
   Horse: horseGenerator,
   Elephant: elephantGenerator,
@@ -240,3 +247,18 @@ export const MOVE_GENERATORS: { [k in PieceType]: (position: Pair<number, number
   Cannon: cannonGenerator,
   Pawn: pawnGenerator,
 };
+
+export function generateAllMoves(board: PieceGrid, side: PieceSide): Move[] {
+  let tmp: Move[] = [];
+
+  for (let i = 0; i < NUM_RANKS; i++) {
+    for (let j = 0; j < NUM_FILES; j++) {
+      const piece = board[i][j];
+      if (piece && piece.side == side) {
+        tmp = tmp.concat(MOVE_GENERATORS[piece.type](new Pair(i, j), board))
+      }
+    }
+  }
+
+  return tmp;
+}
