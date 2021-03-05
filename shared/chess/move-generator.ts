@@ -7,7 +7,7 @@ import { PieceSide, PieceType } from "./piece";
 
 // IMPORTANT: This only generates pseudo legal moves
 // aka it can allow itself to die when being checked
-// It also doesn't account for king-cannot-meet-king rule
+// However it does account for king-meet-king rule
 
 export type MoveGenerator = (position: Pair<number, number>, board: PieceGrid) => Move[];
 
@@ -139,8 +139,12 @@ function advisorGenerator(position: Pair<number, number>, board: PieceGrid): Mov
 }
 
 function kingGenerator(position: Pair<number, number>, board: PieceGrid): Move[] {
+  const piece = board[position.first][position.second];
+  if (!piece) return [];
+
   const dx = [0, 1, 0, -1];
   const dy = [-1, 0, 1, 0];
+
   return kingBoxPieceGenerator(position, board, dx, dy);
 }
 

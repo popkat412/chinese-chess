@@ -15,6 +15,10 @@ export default class Pair<First, Second> {
     }
   }
 
+  copy(): Pair<First, Second> {
+    return new Pair(this.first, this.second);
+  }
+
   toString() {
     return `(${this.first}, ${this.second})`;
   }

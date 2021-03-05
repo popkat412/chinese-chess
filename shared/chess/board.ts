@@ -4,7 +4,7 @@ import create2dArray from "../utilities/2d-array";
 import Move from "./move";
 import { Piece, PieceSide, PieceType } from "./piece";
 import { MOVE_GENERATORS } from "./move-generator";
-import { filterPseudoLegalMoves as generateFullyLegalMoves } from "./fully-legal-moves";
+import { generateFullyLegalMoves } from "./fully-legal-moves";
 
 
 export type PieceGrid = (Piece | undefined)[][];
