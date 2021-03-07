@@ -1,10 +1,26 @@
+import { deserialize, serialize } from "class-transformer";
 import p5 from "p5";
-import { NUM_FILES, NUM_RANKS } from "../shared/constants";
-import Move from "../shared/chess/move";
-import Pair from "../shared/ds/pair";
+import 'reflect-metadata';
+import { io } from "socket.io-client";
 import Game from "../shared/chess/game";
+import Move from "../shared/chess/move";
 import { generateAllMoves } from "../shared/chess/move-generator";
+import { PersonRole } from "../shared/chess/person";
+import { PieceSide } from "../shared/chess/piece";
+import { NUM_FILES, NUM_RANKS } from "../shared/constants";
+import Pair from "../shared/ds/pair";
+import { ERROR_EVENT, GAME_UPDATE_EVENT, JoinGameData, JOIN_GAME_EVENT, MAKE_MOVE_EVENT } from "../shared/events";
+import CreateGame from "../shared/models/create-game";
 
+// test
+// console.log("TESTING 2D ARRAY");
+// console.log(create2dArray(10, 10));
+// console.table(create2dArray(10, 10));
+// console.table(create2dArray(10, 10, "hi"));
+// console.table(create2dArray(10, 10, null));
+// console.table(create2dArray(10, 10, undefined));
+
+// DRAWING STUFF
 // These are not constants because in the future I might want
 // these to change as the screen size changes
 let GRID_SQUARE_SIZE = 60;
@@ -13,15 +29,36 @@ let CANVAS_HEIGHT = (NUM_RANKS - 1) * GRID_SQUARE_SIZE + V_PADDING * 2;
 let CANVAS_WIDTH = (NUM_FILES - 1) * GRID_SQUARE_SIZE + H_PADDING * 2;
 let PIECE_SIZE = 55;
 
+// GAME LOGIC STUFF
 let game = new Game();
 game.board.log();
+
+// HTML STUFF
+let showingCanvas = false;
+const canvasContainer = document.getElementById("canvas-container")!;
+const landingContainer = document.getElementById("landing-container")!;
+
+// SOCKET/SERVER STUFF
+const ENDPOINT = "http://localhost:3000/api/";
+
+const socket = io("http://localhost:3000", { autoConnect: false });
+socket.onAny((event, ...args) => {
+  console.log(`New socket event: ${event}, ${args}`);
+});
+socket.on(GAME_UPDATE_EVENT, (data: string) => {
+  game = deserialize(Game, data);
+});
+socket.on(ERROR_EVENT, (error: string) => {
+  console.error(`Socket returned error: ${error}`);
+  alert(`Socket returned error: ${error}`);
+});
 
 new p5((p: p5) => {
   // VARIABLES
   // ---------
 
   // This is the coordinate of the piece being dragged
-  let currentlyDraggingPos: Pair<number, number> | null = null;
+  let currentlyDraggingPos: Pair | null = null;
   // This stores information about the mouse and the piece so we can draw the piece being dragged
   // It is a vector from the center of the piece to the mouse
   let currentlyDraggingOffset: p5.Vector | null = null;
@@ -42,6 +79,9 @@ new p5((p: p5) => {
   }
 
   p.mousePressed = () => {
+    // TODO: Check if its his turn to play
+
+    if (!showingCanvas) return;
     console.log(`mouse pressed: (${p.mouseX}, ${p.mouseY})`);
 
     // Check if pressed on piece
@@ -65,6 +105,7 @@ new p5((p: p5) => {
   };
 
   p.mouseReleased = () => {
+    if (!showingCanvas) return;
     if (currentlyDraggingPos && currentlyDraggingOffset) {
 
       // Figure out where it was dropped
@@ -92,6 +133,7 @@ new p5((p: p5) => {
         if (game.board.checkMove(move)) {
           // Move the piece
           game.board.move(move);
+          socket.emit(MAKE_MOVE_EVENT, serialize(move));
         }
       }
 
@@ -107,7 +149,7 @@ new p5((p: p5) => {
         game.board.log();
         break;
       case "z":
-        console.log(generateAllMoves(game.board.grid, game.currentSide));
+        console.log(generateAllMoves(game.board.grid, game.board.currentSide));
         break;
       case "c":
         console.log(`Current size: ${game.board.currentSide}`);
@@ -118,9 +160,9 @@ new p5((p: p5) => {
 
   // HELPER FUNCTIONS
   // ----------------
-  function coordToCanvasPos(coord: Pair<number, number>): Pair<number, number>;
-  function coordToCanvasPos(a: number, b: number): Pair<number, number>;
-  function coordToCanvasPos(a: any, b?: any): Pair<number, number> {
+  function coordToCanvasPos(coord: Pair): Pair;
+  function coordToCanvasPos(a: number, b: number): Pair;
+  function coordToCanvasPos(a: any, b?: any): Pair {
 
     let x: number, y: number;
 
@@ -170,6 +212,7 @@ new p5((p: p5) => {
   }
 
   function drawPieces() {
+    // TODO: Draw the side you're on as the bottom
     for (let i = 0; i < NUM_RANKS; i++) {
       for (let j = 0; j < NUM_FILES; j++) {
         if ((new Pair(i, j)).equals(currentlyDraggingPos)) continue;
@@ -199,4 +242,63 @@ new p5((p: p5) => {
       }
     }
   }
-});
+}, canvasContainer);
+
+document.getElementById("create-game")!.onclick = async () => {
+  console.log("Creating game...");
+
+  if (socket.connected) {
+    console.warn("Socket already open");
+    return;
+  }
+
+  try {
+    const gameId = (await fetch(ENDPOINT + "createGame").then(res => res.json()) as CreateGame).gameId;
+
+    joinGame(gameId);
+  } catch (e) {
+    console.error(e);
+  }
+
+};
+
+function joinGame(gameId: string | null = null) {
+
+
+  if (socket.connected) {
+    console.warn("Socket already open");
+    return;
+  }
+
+  gameId = gameId ?? prompt("Game ID");
+  const name = prompt("Name");
+  const role = prompt("Role");
+  const side = prompt("Side");
+
+  if (!gameId || !role || !name || !side) return;
+
+  const data: JoinGameData = {
+    gameId,
+    name,
+    role: role as PersonRole,
+    side: side as PieceSide,
+  };
+
+  socket.connect();
+  socket.emit(JOIN_GAME_EVENT, data);
+
+  setCanvasVisibility(true);
+}
+
+document.getElementById("join-game")!.onclick = () => {
+  console.log("Joining game...");
+  joinGame();
+};
+
+
+function setCanvasVisibility(showing: boolean) {
+  showingCanvas = showing;
+  canvasContainer.hidden = !showing;
+
+  landingContainer.hidden = showing;
+}

@@ -9,9 +9,9 @@ import { PieceSide, PieceType } from "./piece";
 // aka it can allow itself to die when being checked
 // However it does account for king-meet-king rule
 
-export type MoveGenerator = (position: Pair<number, number>, board: PieceGrid) => Move[];
+export type MoveGenerator = (position: Pair, board: PieceGrid) => Move[];
 
-function rookGenerator(position: Pair<number, number>, board: PieceGrid): Move[] {
+function rookGenerator(position: Pair, board: PieceGrid): Move[] {
 
   const piece = board[position.first][position.second];
   if (!piece) return [];
@@ -19,7 +19,7 @@ function rookGenerator(position: Pair<number, number>, board: PieceGrid): Move[]
   const dx = [0, 0, 1, -1];
   const dy = [1, -1, 0, 0];
 
-  let moves: Pair<number, number>[] = [];
+  let moves: Pair[] = [];
 
   for (let i = 0; i < 4; i++) {
     let x = position.first;
@@ -46,13 +46,13 @@ function rookGenerator(position: Pair<number, number>, board: PieceGrid): Move[]
   return moves.map(v => new Move(position, v));
 }
 
-function blockablePieceGenerator(position: Pair<number, number>, board: PieceGrid, dx: number[], dy: number[], blockX: number[], blockY: number[]): Move[] {
+function blockablePieceGenerator(position: Pair, board: PieceGrid, dx: number[], dy: number[], blockX: number[], blockY: number[]): Move[] {
   console.assert(multipleEquals(dx.length, dy.length, blockX.length, blockY.length));
 
   const piece = board[position.first][position.second];
   if (!piece) return [];
 
-  let moves: Pair<number, number>[] = [];
+  let moves: Pair[] = [];
 
   for (let i = 0; i < dx.length; i++) {
     const x = position.first + dx[i];
@@ -77,7 +77,7 @@ function blockablePieceGenerator(position: Pair<number, number>, board: PieceGri
 
 }
 
-function horseGenerator(position: Pair<number, number>, board: PieceGrid): Move[] {
+function horseGenerator(position: Pair, board: PieceGrid): Move[] {
   // * Order is very important!
   const dx = [-1, +1, +2, +2, +1, -1, -2, -2];
   const dy = [-2, -2, -1, +1, +2, +2, +1, -1];
@@ -87,7 +87,7 @@ function horseGenerator(position: Pair<number, number>, board: PieceGrid): Move[
   return blockablePieceGenerator(position, board, dx, dy, blockX, blockY);
 }
 
-function elephantGenerator(position: Pair<number, number>, board: PieceGrid): Move[] {
+function elephantGenerator(position: Pair, board: PieceGrid): Move[] {
   const dx = [-2, +2, +2, -2];
   const dy = [-2, -2, +2, +2];
   const blockX = [-1, +1, +1, -1];
@@ -96,13 +96,13 @@ function elephantGenerator(position: Pair<number, number>, board: PieceGrid): Mo
   return blockablePieceGenerator(position, board, dx, dy, blockX, blockY);
 }
 
-function kingBoxPieceGenerator(position: Pair<number, number>, board: PieceGrid, dx: number[], dy: number[]): Move[] {
+function kingBoxPieceGenerator(position: Pair, board: PieceGrid, dx: number[], dy: number[]): Move[] {
   console.assert(dx.length == dy.length);
 
   const piece = board[position.first][position.second];
   if (!piece) return [];
 
-  let moves: Pair<number, number>[] = [];
+  let moves: Pair[] = [];
 
   for (let i = 0; i < dx.length; i++) {
     const x = position.first + dx[i];
@@ -121,7 +121,7 @@ function kingBoxPieceGenerator(position: Pair<number, number>, board: PieceGrid,
 
 }
 
-function isInsideKingBox(toCheck: Pair<number, number>, side: PieceSide): boolean {
+function isInsideKingBox(toCheck: Pair, side: PieceSide): boolean {
   const x = toCheck.first;
   const y = toCheck.second;
 
@@ -132,13 +132,13 @@ function isInsideKingBox(toCheck: Pair<number, number>, side: PieceSide): boolea
   }
 }
 
-function advisorGenerator(position: Pair<number, number>, board: PieceGrid): Move[] {
+function advisorGenerator(position: Pair, board: PieceGrid): Move[] {
   const dx = [-1, +1, +1, -1];
   const dy = [-1, -1, +1, +1];
   return kingBoxPieceGenerator(position, board, dx, dy);
 }
 
-function kingGenerator(position: Pair<number, number>, board: PieceGrid): Move[] {
+function kingGenerator(position: Pair, board: PieceGrid): Move[] {
   const piece = board[position.first][position.second];
   if (!piece) return [];
 
@@ -148,14 +148,14 @@ function kingGenerator(position: Pair<number, number>, board: PieceGrid): Move[]
   return kingBoxPieceGenerator(position, board, dx, dy);
 }
 
-function cannonGenerator(position: Pair<number, number>, board: PieceGrid): Move[] {
+function cannonGenerator(position: Pair, board: PieceGrid): Move[] {
   const piece = board[position.first][position.second];
   if (!piece) return [];
 
   const dx = [0, 0, 1, -1];
   const dy = [1, -1, 0, 0];
 
-  let moves: Pair<number, number>[] = [];
+  let moves: Pair[] = [];
 
   for (let i = 0; i < 4; i++) {
     let x = position.first;
@@ -191,7 +191,7 @@ function cannonGenerator(position: Pair<number, number>, board: PieceGrid): Move
   return moves.map(v => new Move(position, v));
 }
 
-function isAcrossRiver(position: Pair<number, number>, side: PieceSide): boolean {
+function isAcrossRiver(position: Pair, side: PieceSide): boolean {
   const y = position.first;
 
   if (side == PieceSide.Black) { // black is at the top
@@ -201,7 +201,7 @@ function isAcrossRiver(position: Pair<number, number>, side: PieceSide): boolean
   }
 }
 
-function pawnGenerator(position: Pair<number, number>, board: PieceGrid): Move[] {
+function pawnGenerator(position: Pair, board: PieceGrid): Move[] {
   const piece = board[position.first][position.second];
   if (!piece) return [];
 

@@ -1,13 +1,13 @@
-export default class Pair<First, Second> {
-  first: First;
-  second: Second;
+export default class Pair {
+  first: number;
+  second: number;
 
-  constructor(first: First, second: Second) {
+  constructor(first: number, second: number) {
     this.first = first;
     this.second = second;
   }
 
-  equals(other: Pair<First, Second> | null | undefined): boolean {
+  equals(other: Pair | null | undefined): boolean {
     if (other) {
       return this.first == other.first && this.second == other.second;
     } else {
@@ -15,7 +15,7 @@ export default class Pair<First, Second> {
     }
   }
 
-  copy(): Pair<First, Second> {
+  copy(): Pair {
     return new Pair(this.first, this.second);
   }
 

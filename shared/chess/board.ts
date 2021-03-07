@@ -1,13 +1,14 @@
+import { Transform, Type } from "class-transformer";
 import { NUM_FILES, NUM_RANKS, OPPOSITE_SIDE, PIECE_FROM_FEN, STARTING_POSITION_FEN } from "../constants";
 import Pair from "../ds/pair";
 import create2dArray from "../utilities/2d-array";
-import Move from "./move";
-import { Piece, PieceSide, PieceType } from "./piece";
-import { MOVE_GENERATORS } from "./move-generator";
 import { generateFullyLegalMoves } from "./fully-legal-moves";
+import Move from "./move";
+import { MOVE_GENERATORS } from "./move-generator";
+import { Piece, PieceSide, PieceType } from "./piece";
 
 
-export type PieceGrid = (Piece | undefined)[][];
+export type PieceGrid = (Piece | null)[][];
 
 export class Board {
 
@@ -16,6 +17,12 @@ export class Board {
   /// (0, 0) is the top left of the grid.
   /// The top of the grid is always the red and the bottom is always the black.
   /// However, the pieces may be drawn to the screen differently
+  @Type(() => Array)
+  @Transform(({ obj }) => {
+    console.log("transforming obj");
+    console.table(obj.grid);
+    return obj.grid.map((v1: any) => v1.map((v2: any) => { if (v2) return new Piece(v2.type, v2.side); else return null; }));
+  })
   readonly grid: PieceGrid;
 
   currentSide: PieceSide;
@@ -39,7 +46,7 @@ export class Board {
   }
 
   // This returns fully legal moves
-  availableMoves(piecePos: Pair<number, number>): Move[] {
+  availableMoves(piecePos: Pair): Move[] {
     const piece = this.grid[piecePos.first][piecePos.second];
     if (piece) {
       return generateFullyLegalMoves(this, MOVE_GENERATORS[piece.type](piecePos, this.grid));
@@ -52,7 +59,7 @@ export class Board {
     if (move.to.equals(move.from)) return;
     move.capturedPiece = this.grid[move.to.first][move.to.second];
     this.grid[move.to.first][move.to.second] = this.grid[move.from.first][move.from.second];
-    this.grid[move.from.first][move.from.second] = undefined;
+    this.grid[move.from.first][move.from.second] = null;
 
     this.swapPlayer();
   }
@@ -65,8 +72,8 @@ export class Board {
     this.swapPlayer();
   }
 
-  findPiece(type: PieceType, side: PieceSide): Pair<number, number>[] {
-    let pos: Pair<number, number>[] = [];
+  findPiece(type: PieceType, side: PieceSide): Pair[] {
+    let pos: Pair[] = [];
     for (let i = 0; i < NUM_RANKS; i++) {
       for (let j = 0; j < NUM_FILES; j++) {
         const piece = this.grid[i][j];
