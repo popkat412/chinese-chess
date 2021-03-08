@@ -9,7 +9,7 @@ import { v4 as uuidV4 } from "uuid";
 import Game from "../shared/chess/game";
 import Move from "../shared/chess/move";
 import Person, { PersonRole } from "../shared/chess/person";
-import { ERROR_EVENT, GAME_UPDATE_EVENT, JoinGameData, JOIN_GAME_EVENT, MAKE_MOVE_EVENT } from "../shared/events";
+import { ERROR_EVENT, GAME_UPDATE_EVENT, JoinGameData, JOIN_GAME_EVENT, MAKE_MOVE_EVENT, USER_ID_EVENT } from "../shared/events";
 import CreateGame from "../shared/models/create-game";
 import GameInfo from "../shared/models/game-info";
 import State from "./state";
@@ -77,18 +77,28 @@ app.get("/api/testing/state", (_req, res) => {
 io.on("connection", (socket: Socket) => {
   console.log("User connected");
 
+
   function error(message: string) {
     socket.emit(ERROR_EVENT, message);
   }
 
   socket.on(JOIN_GAME_EVENT, (data: JoinGameData) => {
     console.log("received join game event: ", data);
+
     const game = state.games[data.gameId];
 
     // Check if game exists
     if (!game) {
       error(`No game with ${data.gameId} exists`);
       return;
+    }
+
+    // Check user id
+    if (data.userId) {
+      if (!game.people.has(data.userId)) {
+        error(`No person with id ${data.userId} exists in game ${data.gameId}`);
+        return;
+      }
     }
 
     // Check if role is valid
@@ -111,11 +121,14 @@ io.on("connection", (socket: Socket) => {
       }
 
     }
+    
+    const userId = uuidV4();
 
-    // use socket id as player id for now
-    game.people.set(socket.id ,new Person(data.name, data.role, data.side));
-
+    game.people.set(userId, new Person(data.name, data.role, data.side));
     socket.join(data.gameId);
+    socket.emit(USER_ID_EVENT, userId);
+    (socket as any).userId = userId; // TODO: add this to .d.ts
+
   });
 
   socket.on(MAKE_MOVE_EVENT, (data: string) => {
@@ -140,6 +153,13 @@ io.on("connection", (socket: Socket) => {
 
   socket.on("disconnect", () => {
     console.log("User disconnected");
+
+    const userId =  (socket as any).userId;
+
+    const gameId = findGamePersonIsIn(userId);
+    if (!gameId) return;
+
+    state.games[gameId].people.delete(userId);
   })
 });
 

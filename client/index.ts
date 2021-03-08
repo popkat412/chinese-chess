@@ -9,7 +9,7 @@ import { PersonRole } from "../shared/chess/person";
 import { PieceSide } from "../shared/chess/piece";
 import { NUM_FILES, NUM_RANKS } from "../shared/constants";
 import Pair from "../shared/ds/pair";
-import { ERROR_EVENT, GAME_UPDATE_EVENT, JoinGameData, JOIN_GAME_EVENT, MAKE_MOVE_EVENT } from "../shared/events";
+import { ERROR_EVENT, GAME_UPDATE_EVENT, JoinGameData, JOIN_GAME_EVENT, MAKE_MOVE_EVENT, USER_ID_EVENT } from "../shared/events";
 import CreateGame from "../shared/models/create-game";
 
 // DRAWING STUFF
@@ -24,6 +24,7 @@ let PIECE_SIZE = 55;
 // GAME LOGIC STUFF
 let game = new Game();
 game.board.log();
+let myUserId: string | null = null;
 
 // HTML STUFF
 let showingCanvas = false;
@@ -35,10 +36,14 @@ const ENDPOINT = "http://localhost:3000/api/";
 
 const socket = io("http://localhost:3000", { autoConnect: false });
 socket.onAny((event, ...args) => {
-  console.log(`New socket event: ${event}, ${args}`);
+  console.info(`New socket event: ${event}, ${args}`);
 });
 socket.on(GAME_UPDATE_EVENT, (data: string) => {
   game = deserialize(Game, data);
+});
+socket.on(USER_ID_EVENT, (userId: string) => {
+  myUserId = userId;
+  console.log(`My user id: ${myUserId}`);
 });
 socket.on(ERROR_EVENT, (error: string) => {
   console.error(`Socket returned error: ${error}`);
@@ -85,11 +90,15 @@ new p5((p: p5) => {
           console.log(`clicked on piece: ${new Pair(i, j)}`);
           console.log(`canvas pos: ${canvasPos}`);
 
-          if (game.board.grid[i][j]?.side == game.board.currentSide) {
-            // Clicked on piece!
-            currentlyDraggingPos = new Pair(i, j);
-            currentlyDraggingOffset = p5.Vector.sub(p.createVector(canvasPos.first, canvasPos.second), p.createVector(p.mouseX, p.mouseY));
-            break;
+          console.log(`myUserId: ${myUserId}`);
+          console.log(`game.people.get(myUserId)?.side: ${game.people.get(myUserId??"")?.side}`)
+          if (myUserId && (game.board.currentSide == game.people.get(myUserId)?.side)) {
+            if (game.board.grid[i][j]?.side == game.board.currentSide) {
+              // Clicked on piece!
+              currentlyDraggingPos = new Pair(i, j);
+              currentlyDraggingOffset = p5.Vector.sub(p.createVector(canvasPos.first, canvasPos.second), p.createVector(p.mouseX, p.mouseY));
+              break;
+            }
           }
         }
       }
@@ -255,8 +264,6 @@ document.getElementById("create-game")!.onclick = async () => {
 };
 
 function joinGame(gameId: string | null = null) {
-
-
   if (socket.connected) {
     console.warn("Socket already open");
     return;
@@ -271,6 +278,7 @@ function joinGame(gameId: string | null = null) {
 
   const data: JoinGameData = {
     gameId,
+    userId: myUserId,
     name,
     role: role as PersonRole,
     side: side as PieceSide,

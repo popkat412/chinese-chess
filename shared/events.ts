@@ -4,10 +4,14 @@ import { PieceSide } from "./chess/piece";
 // No data
 export const ERROR_EVENT = "error";
 
+// data is the user id
+export const USER_ID_EVENT ="userId";
+
 // Data is object as described in JoinGameData
 export const JOIN_GAME_EVENT = "joinGame";
 export interface JoinGameData {
   gameId: string;
+  userId: string | null;
   role: PersonRole;
   side?: PieceSide;
   name: string;
