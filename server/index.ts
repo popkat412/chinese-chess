@@ -113,7 +113,7 @@ io.on("connection", (socket: Socket) => {
     }
 
     // use socket id as player id for now
-    game.people.push(new Person(data.name, data.role, socket.id, data.side));
+    game.people.set(socket.id ,new Person(data.name, data.role, data.side));
 
     socket.join(data.gameId);
   });
@@ -145,8 +145,8 @@ io.on("connection", (socket: Socket) => {
 
 function findGamePersonIsIn(personId: string): string | null {
   for (const gameId in state.games) {
-    for (const person of state.games[gameId].people) {
-      if (person.id == personId) return gameId;
+    if (state.games[gameId].people.has(personId)) {
+      return gameId;
     }
   }
 

@@ -12,14 +12,6 @@ import Pair from "../shared/ds/pair";
 import { ERROR_EVENT, GAME_UPDATE_EVENT, JoinGameData, JOIN_GAME_EVENT, MAKE_MOVE_EVENT } from "../shared/events";
 import CreateGame from "../shared/models/create-game";
 
-// test
-// console.log("TESTING 2D ARRAY");
-// console.log(create2dArray(10, 10));
-// console.table(create2dArray(10, 10));
-// console.table(create2dArray(10, 10, "hi"));
-// console.table(create2dArray(10, 10, null));
-// console.table(create2dArray(10, 10, undefined));
-
 // DRAWING STUFF
 // These are not constants because in the future I might want
 // these to change as the screen size changes

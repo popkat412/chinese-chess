@@ -4,11 +4,11 @@ import Person, { PersonRole } from "./person";
 
 export default class Game {
   @Type(() => Board) board: Board = new Board();
-  @Type(() => Person) people: Person[] = [];
+  @Type(() => Person) people: Map<string, Person> = new Map();
 
   @Exclude()
   get players(): Person[] {
-    return this.people.filter(v => v.role == PersonRole.Player);
+    return Array.from(this.people.values()).filter(v => v.role == PersonRole.Player);
   }
 
   @Exclude()

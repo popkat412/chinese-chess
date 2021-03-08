@@ -4,14 +4,12 @@ export enum PersonRole { Spectator = "Spectator", Player = "Player" };
 
 export default class Person {
   name: string;
-  id: string;
   role: PersonRole;
   side: PieceSide | null;
 
-  constructor(name: string, role: PersonRole, id: string, side: PieceSide | null = null) {
+  constructor(name: string, role: PersonRole,  side: PieceSide | null = null) {
     this.name = name;
     this.role = role;
     this.side = side;
-    this.id = id;
   }
 }
