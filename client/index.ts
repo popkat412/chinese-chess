@@ -79,7 +79,14 @@ new p5((p: p5) => {
     // TODO: Check if its his turn to play
 
     if (!showingCanvas) return;
+
     console.log(`mouse pressed: (${p.mouseX}, ${p.mouseY})`);
+    console.log(`myUserId: ${myUserId}`);
+    console.log(`game.people.get(myUserId)?.side: ${game.people.get(myUserId ?? "")?.side}`)
+
+    if (!myUserId) return;
+    if (game.people.get(myUserId)?.role != PersonRole.Player) return;
+    if (game.board.currentSide != game.people.get(myUserId)?.side) return;
 
     // Check if pressed on piece
     for (let i = 0; i < NUM_RANKS; i++) {
@@ -90,15 +97,11 @@ new p5((p: p5) => {
           console.log(`clicked on piece: ${new Pair(i, j)}`);
           console.log(`canvas pos: ${canvasPos}`);
 
-          console.log(`myUserId: ${myUserId}`);
-          console.log(`game.people.get(myUserId)?.side: ${game.people.get(myUserId??"")?.side}`)
-          if (myUserId && (game.board.currentSide == game.people.get(myUserId)?.side)) {
-            if (game.board.grid[i][j]?.side == game.board.currentSide) {
-              // Clicked on piece!
-              currentlyDraggingPos = new Pair(i, j);
-              currentlyDraggingOffset = p5.Vector.sub(p.createVector(canvasPos.first, canvasPos.second), p.createVector(p.mouseX, p.mouseY));
-              break;
-            }
+          if (game.board.grid[i][j]?.side == game.board.currentSide) {
+            // Clicked on piece!
+            currentlyDraggingPos = new Pair(i, j);
+            currentlyDraggingOffset = p5.Vector.sub(p.createVector(canvasPos.first, canvasPos.second), p.createVector(p.mouseX, p.mouseY));
+            break;
           }
         }
       }

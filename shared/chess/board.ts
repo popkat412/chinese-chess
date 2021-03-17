@@ -19,8 +19,6 @@ export class Board {
   /// However, the pieces may be drawn to the screen differently
   @Type(() => Array)
   @Transform(({ obj }) => {
-    console.log("transforming obj");
-    console.table(obj.grid);
     return obj.grid.map((v1: any) => v1.map((v2: any) => { if (v2) return new Piece(v2.type, v2.side); else return null; }));
   })
   readonly grid: PieceGrid;
