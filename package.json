@@ -8,7 +8,9 @@
     "dev-client": "cd client && webpack serve",
     "build-server": "cd server && tsc",
     "dev-server": "cd server && ts-node-dev --respawn index.ts",
-    "run-server": "cd server && ts-node ."
+    "run-server": "cd server && ts-node .",
+    "build": "concurrently \"npm:build-*\"",
+    "dev": "concurrently -c black.bgGreen.bold,black.bgBlue.bold -n client,server \"npm:dev-client\" \"npm:dev-server\""
   },
   "keywords": [],
   "author": "",
@@ -31,6 +33,7 @@
     "@types/p5": "^0.9.1",
     "@types/socket.io": "^2.1.13",
     "@types/uuid": "^8.3.0",
+    "concurrently": "^6.0.0",
     "copy-webpack-plugin": "^7.0.0",
     "ts-loader": "^8.0.17",
     "ts-node": "^9.1.1",
