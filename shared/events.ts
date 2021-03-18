@@ -11,7 +11,6 @@ export const USER_ID_EVENT = "userId";
 export const JOIN_GAME_EVENT = "joinGame";
 export interface JoinGameData {
   gameId: string;
-  userId: string | null;
   role: PersonRole;
   side?: PieceSide;
   name: string;

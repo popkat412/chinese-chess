@@ -25,6 +25,10 @@ import validateNickname from "../shared/validation";
 //     GLOBALS     //
 //=================//
 
+declare global {
+  var __DEPLOY_URL__: string;
+}
+
 // DRAWING STUFF
 // These are not constants because in the future I might want
 // these to change as the screen size changes
@@ -34,7 +38,6 @@ let H_PADDING = 40,
 let CANVAS_HEIGHT = (NUM_RANKS - 1) * GRID_SQUARE_SIZE + V_PADDING * 2;
 let CANVAS_WIDTH = (NUM_FILES - 1) * GRID_SQUARE_SIZE + H_PADDING * 2;
 let PIECE_SIZE = 55;
-const canvasContainer = document.getElementById("canvas-container")!;
 
 // GAME LOGIC STUFF
 let game = new Game();
@@ -82,8 +85,8 @@ new p5((p: p5) => {
   // p5 Functions
   // ------------
   p.setup = () => {
-    console.log("setup called");
-    p.createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
+    const canvas = p.createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
+    canvas.parent("canvas-container");
   };
 
   p.draw = () => {
@@ -316,7 +319,7 @@ new p5((p: p5) => {
       }
     }
   }
-}, canvasContainer);
+});
 
 //===========//
 //    UI     //
@@ -336,6 +339,7 @@ interface VueData {
   showingCanvas: boolean;
   joinGameData: JoinGameFormData;
   createGameData: CreateGameFormData;
+  gameId: string | null;
 }
 
 const vm = new Vue({
@@ -354,27 +358,43 @@ const vm = new Vue({
         role: PersonRole.Player,
         side: PieceSide.Red,
       },
+      gameId: null,
     };
   },
+  computed: {
+    joinUrl(): string {
+      return `${__DEPLOY_URL__}/?gameId=${this.gameId}`;
+    },
+  },
   methods: {
-    joinGame(usingData?: JoinGameFormData) {
+    async copyJoinUrl() {
+      await navigator.clipboard.writeText(this.joinUrl);
+      alert("Copied to clipboard!");
+    },
+    joinGame(data: JoinGameData) {
       if (socket.connected) {
         console.warn("Socket already open");
         alert("An unexpected error occurred");
         return;
       }
 
-      // Validate form inputs
-      if (!usingData) {
-        if (this.joinGameData.gameId.trim() == "") {
-          alert("Game ID is required");
-          return;
-        }
+      socket.connect();
+      socket.emit(JOIN_GAME_EVENT, data);
 
-        const nicknameValidation = validateNickname(this.joinGameData.name);
-        if (nicknameValidation != true) {
-          alert(nicknameValidation);
-        }
+      this.showingCanvas = true;
+    },
+
+    joinGamePressed() {
+      // Validate form inputs
+      if (this.joinGameData.gameId.trim() == "") {
+        alert("Game ID is required");
+        return;
+      }
+
+      const nicknameValidation = validateNickname(this.joinGameData.name);
+      if (nicknameValidation != true) {
+        alert(nicknameValidation);
+        return;
       }
 
       // Prepare the data
@@ -383,33 +403,27 @@ const vm = new Vue({
         name: this.joinGameData.name,
         role: this.joinGameData.role as PersonRole,
         side: this.joinGameData.side as PieceSide,
-        userId: myUserId,
       };
 
-      socket.connect();
-      socket.emit(JOIN_GAME_EVENT, usingData ?? data);
-
-      this.showingCanvas = true;
+      this.joinGame(data);
     },
 
-    async createGame() {
+    async createGamePressed() {
       console.log("Creating game...");
-
-      if (socket.connected) {
-        console.warn("Socket already open");
-        return;
-      }
 
       // Validate form inputs
       const nicknameValidation = validateNickname(this.createGameData.name);
       if (nicknameValidation != true) {
         alert(nicknameValidation);
+        return;
       }
 
       try {
         const gameId = ((await fetch(ENDPOINT + "createGame").then((res) =>
           res.json()
         )) as CreateGame).gameId;
+
+        this.gameId = gameId;
 
         this.joinGame({
           gameId,
@@ -420,7 +434,14 @@ const vm = new Vue({
       } catch (e) {
         console.error(e);
         alert(`Error creating game: ${e}`);
+        return;
       }
+    },
+
+    leaveGamePressed() {
+      console.log("Leaving game");
+
+      socket.disconnect();
     },
   },
 });

@@ -1,11 +1,13 @@
 const path = require("path");
+const webpack = require("webpack");
 const CopyPlugin = require('copy-webpack-plugin');
 
 const distPath = path.resolve(__dirname, "..", "dist", "client");
+const nodeEnv = process.env.NODE_ENV;
 
 module.exports = {
   entry: "./index.ts",
-  mode: "development",
+  mode: nodeEnv,
   devtool: "inline-source-map",
   module: {
     rules: [
@@ -32,6 +34,10 @@ module.exports = {
         { from: "index.html", to: path.resolve(distPath, "index.html") },
         { from: "styles.css", to: path.resolve(distPath, "styles.css") },
       ]
+    }),
+
+    new webpack.DefinePlugin({
+      __DEPLOY_URL__: JSON.stringify(nodeEnv == "production" ? "" : "https://localhost:8080"),
     }),
   ]
 };

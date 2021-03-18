@@ -82,8 +82,9 @@ io.on("connection", (socket: Socket) => {
   console.log("User connected");
   state.socketInfo.set(socket, {});
 
-  function error(message: string) {
+  function error(message: string, disconnect: boolean = false) {
     socket.emit(ERROR_EVENT, message);
+    if (disconnect) socket.disconnect();
   }
 
   function emitBoardUpdate(gameId: string) {
@@ -98,33 +99,25 @@ io.on("connection", (socket: Socket) => {
 
     // Check if game exists
     if (!game) {
-      error(`No game with ${data.gameId} exists`);
+      error(`No game with ${data.gameId} exists`, true);
       return;
-    }
-
-    // Check user id
-    if (data.userId) {
-      if (!game.people.has(data.userId)) {
-        error(`No person with id ${data.userId} exists in game ${data.gameId}`);
-        return;
-      }
     }
 
     // Check if role is valid
     if (data.role == PersonRole.Player) {
       if (!data.side) {
-        error("data.role == PlayerRole.Player but no side is specified");
+        error("data.role == PlayerRole.Player but no side is specified", true);
         return;
       }
 
       const numPlayersAlreadyInGame = game.players.length;
 
       if (numPlayersAlreadyInGame == 2) {
-        error(`Game already has 2 players`);
+        error(`Game already has 2 players`, true);
         return;
       } else if (numPlayersAlreadyInGame == 1) {
         if (game.players[0].side == data.side) {
-          error(`Game already has player on side ${data.side}`);
+          error(`Game already has player on side ${data.side}`, true);
           return;
         }
       }
@@ -132,12 +125,12 @@ io.on("connection", (socket: Socket) => {
 
     // Check name
     if (!data.name) {
-      error("Nickname required");
+      error("Nickname required", true);
       return;
     } else {
       const validateName = validateNickname(data.name);
       if (validateName != true) {
-        error(validateName);
+        error(validateName, true);
         return;
       }
     }
@@ -191,6 +184,8 @@ io.on("connection", (socket: Socket) => {
     if (!gameId) return;
 
     state.games[gameId].people.delete(userId);
+
+    // TODO: Delete games after 24 hours
   });
 });
 
