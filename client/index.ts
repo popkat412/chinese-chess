@@ -2,6 +2,7 @@ import { deserialize, serialize } from "class-transformer";
 import p5 from "p5";
 import "reflect-metadata";
 import { io } from "socket.io-client";
+import Vue from "vue";
 import Game from "../shared/chess/game";
 import Move from "../shared/chess/move";
 import { generateAllMoves } from "../shared/chess/move-generator";
@@ -18,6 +19,11 @@ import {
   USER_ID_EVENT,
 } from "../shared/events";
 import CreateGame from "../shared/models/create-game";
+import validateNickname from "../shared/validation";
+
+//=================//
+//     GLOBALS     //
+//=================//
 
 // DRAWING STUFF
 // These are not constants because in the future I might want
@@ -28,18 +34,16 @@ let H_PADDING = 40,
 let CANVAS_HEIGHT = (NUM_RANKS - 1) * GRID_SQUARE_SIZE + V_PADDING * 2;
 let CANVAS_WIDTH = (NUM_FILES - 1) * GRID_SQUARE_SIZE + H_PADDING * 2;
 let PIECE_SIZE = 55;
+const canvasContainer = document.getElementById("canvas-container")!;
 
 // GAME LOGIC STUFF
 let game = new Game();
 game.board.log();
 let myUserId: string | null = null;
 
-// HTML STUFF
-let showingCanvas = false;
-const canvasContainer = document.getElementById("canvas-container")!;
-const landingContainer = document.getElementById("landing-container")!;
-
-// SOCKET/SERVER STUFF
+//================//
+//     SERVER     //
+//================//
 const ENDPOINT = "http://localhost:3000/api/";
 
 const socket = io("http://localhost:3000", { autoConnect: false });
@@ -57,9 +61,16 @@ socket.on(ERROR_EVENT, (error: string) => {
   console.error(`Socket returned error: ${error}`);
   alert(`Socket returned error: ${error}`);
 });
+socket.on("disconnect", () => {
+  myUserId = null;
+  vm.$data.showingCanvas = false;
+});
 
+//================//
+//     SKETCH     //
+//================//
 new p5((p: p5) => {
-  // VARIABLES
+  // Variables
   // ---------
 
   // This is the coordinate of the piece being dragged
@@ -68,9 +79,10 @@ new p5((p: p5) => {
   // It is a vector from the center of the piece to the mouse
   let currentlyDraggingOffset: p5.Vector | null = null;
 
-  // P5 FUNCTIONS
+  // p5 Functions
   // ------------
   p.setup = () => {
+    console.log("setup called");
     p.createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
   };
 
@@ -84,9 +96,7 @@ new p5((p: p5) => {
   };
 
   p.mousePressed = () => {
-    // TODO: Check if its his turn to play
-
-    if (!showingCanvas) return;
+    if (!vm.$data.showingCanvas) return;
 
     console.log(`mouse pressed: (${p.mouseX}, ${p.mouseY})`);
     console.log(`myUserId: ${myUserId}`);
@@ -127,7 +137,8 @@ new p5((p: p5) => {
   };
 
   p.mouseReleased = () => {
-    if (!showingCanvas) return;
+    if (!vm.$data.showingCanvas) return;
+
     if (currentlyDraggingPos && currentlyDraggingOffset) {
       // Figure out where it was dropped
       let file = -1,
@@ -183,7 +194,7 @@ new p5((p: p5) => {
     }
   };
 
-  // HELPER FUNCTIONS
+  // Helper Functions
   // ----------------
   function coordToCanvasPos(
     coord: Pair,
@@ -208,7 +219,7 @@ new p5((p: p5) => {
     );
   }
 
-  // DRAWING FUNCTIONS
+  // Drawing Functions
   // -----------------
 
   function drawBoard() {
@@ -307,60 +318,109 @@ new p5((p: p5) => {
   }
 }, canvasContainer);
 
-document.getElementById("create-game")!.onclick = async () => {
-  console.log("Creating game...");
+//===========//
+//    UI     //
+//===========//
 
-  if (socket.connected) {
-    console.warn("Socket already open");
-    return;
-  }
-
-  try {
-    const gameId = ((await fetch(ENDPOINT + "createGame").then((res) =>
-      res.json()
-    )) as CreateGame).gameId;
-
-    joinGame(gameId);
-  } catch (e) {
-    console.error(e);
-  }
-};
-
-function joinGame(gameId: string | null = null) {
-  if (socket.connected) {
-    console.warn("Socket already open");
-    return;
-  }
-
-  gameId = gameId ?? prompt("Game ID");
-  const name = prompt("Name");
-  const role = prompt("Role");
-  const side = prompt("Side");
-
-  if (!gameId || !role || !name || !side) return;
-
-  const data: JoinGameData = {
-    gameId,
-    userId: myUserId,
-    name,
-    role: role as PersonRole,
-    side: side as PieceSide,
-  };
-
-  socket.connect();
-  socket.emit(JOIN_GAME_EVENT, data);
-
-  setCanvasVisibility(true);
+interface CreateGameFormData {
+  name: string;
+  role: string;
+  side: string;
 }
 
-document.getElementById("join-game")!.onclick = () => {
-  console.log("Joining game...");
-  joinGame();
-};
-
-function setCanvasVisibility(showing: boolean) {
-  showingCanvas = showing;
-  canvasContainer.hidden = !showing;
-
-  landingContainer.hidden = showing;
+interface JoinGameFormData extends CreateGameFormData {
+  gameId: string;
 }
+
+interface VueData {
+  showingCanvas: boolean;
+  joinGameData: JoinGameFormData;
+  createGameData: CreateGameFormData;
+}
+
+const vm = new Vue({
+  el: document.getElementById("app")!,
+  data(): VueData {
+    return {
+      showingCanvas: false,
+      joinGameData: {
+        gameId: "",
+        name: "",
+        role: PersonRole.Player,
+        side: PieceSide.Red,
+      },
+      createGameData: {
+        name: "",
+        role: PersonRole.Player,
+        side: PieceSide.Red,
+      },
+    };
+  },
+  methods: {
+    joinGame(usingData?: JoinGameFormData) {
+      if (socket.connected) {
+        console.warn("Socket already open");
+        alert("An unexpected error occurred");
+        return;
+      }
+
+      // Validate form inputs
+      if (!usingData) {
+        if (this.joinGameData.gameId.trim() == "") {
+          alert("Game ID is required");
+          return;
+        }
+
+        const nicknameValidation = validateNickname(this.joinGameData.name);
+        if (nicknameValidation != true) {
+          alert(nicknameValidation);
+        }
+      }
+
+      // Prepare the data
+      const data: JoinGameData = {
+        gameId: this.joinGameData.gameId,
+        name: this.joinGameData.name,
+        role: this.joinGameData.role as PersonRole,
+        side: this.joinGameData.side as PieceSide,
+        userId: myUserId,
+      };
+
+      socket.connect();
+      socket.emit(JOIN_GAME_EVENT, usingData ?? data);
+
+      this.showingCanvas = true;
+    },
+
+    async createGame() {
+      console.log("Creating game...");
+
+      if (socket.connected) {
+        console.warn("Socket already open");
+        return;
+      }
+
+      // Validate form inputs
+      const nicknameValidation = validateNickname(this.createGameData.name);
+      if (nicknameValidation != true) {
+        alert(nicknameValidation);
+      }
+
+      try {
+        const gameId = ((await fetch(ENDPOINT + "createGame").then((res) =>
+          res.json()
+        )) as CreateGame).gameId;
+
+        this.joinGame({
+          gameId,
+          name: this.createGameData.name,
+          role: this.createGameData.role as PersonRole,
+          side: this.createGameData.side as PieceSide,
+        });
+      } catch (e) {
+        console.error(e);
+        alert(`Error creating game: ${e}`);
+      }
+    },
+  },
+});

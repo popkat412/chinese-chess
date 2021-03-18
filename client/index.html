@@ -4,13 +4,55 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="styles.css" />
     <title>Y2 CS Final Project</title>
   </head>
   <body>
-    <div id="canvas-container" hidden></div>
-    <div id="landing-container">
-      <button id="create-game">Create Game</button>
-      <button id="join-game">Join Game</button>
+    <div id="app">
+      <div id="canvas-container" v-show="showingCanvas"></div>
+      <div id="landing-container" v-show="!showingCanvas">
+        <div class="container">
+          <p>Join Game</p>
+          <label for="join:gameid">Game Id</label>
+          <input type="text" id="join:gameid" v-model="joinGameData.gameId" />
+          <br />
+          <label for="join:name">Nickname</label>
+          <input type="text" id="join:name" v-model="joinGameData.name" />
+          <br />
+          <label for="join:role">Role</label>
+          <select id="join:role" v-model="joinGameData.role">
+            <option value="Player">Player</option>
+            <option value="Spectator">Spectator</option>
+          </select>
+          <br />
+          <label for="join:side">Role</label>
+          <select id="join:side" v-model="joinGameData.side">
+            <option value="red">Red</option>
+            <option value="black">Black</option>
+          </select>
+          <br />
+          <button @click="joinGame">Join!</button>
+        </div>
+        <div class="container">
+          <p>Create Game</p>
+          <label for="create:name">Nickname</label>
+          <input type="text" id="create:name" v-model="createGameData.name" />
+          <br />
+          <label for="create:role">Role</label>
+          <select id="create:role" v-model="createGameData.role">
+            <option value="Player">Player</option>
+            <option value="Spectator">Spectator</option>
+          </select>
+          <br />
+          <label for="create:side">Role</label>
+          <select id="create:side" v-model="createGameData.side">
+            <option value="red">Red</option>
+            <option value="black">Black</option>
+          </select>
+          <br />
+          <button @click="createGame">Create!</button>
+        </div>
+      </div>
     </div>
     <script src="bundle.js"></script>
   </body>

@@ -9,9 +9,18 @@ import { v4 as uuidV4 } from "uuid";
 import Game from "../shared/chess/game";
 import Move from "../shared/chess/move";
 import Person, { PersonRole } from "../shared/chess/person";
-import { ERROR_EVENT, GAME_UPDATE_EVENT, JoinGameData, JOIN_GAME_EVENT, MAKE_MOVE_EVENT, READY_EVENT, USER_ID_EVENT } from "../shared/events";
+import {
+  ERROR_EVENT,
+  GAME_UPDATE_EVENT,
+  JoinGameData,
+  JOIN_GAME_EVENT,
+  MAKE_MOVE_EVENT,
+  READY_EVENT,
+  USER_ID_EVENT,
+} from "../shared/events";
 import CreateGame from "../shared/models/create-game";
 import GameInfo from "../shared/models/game-info";
+import validateNickname from "../shared/validation";
 import State from "./state";
 
 const app = express();
@@ -23,7 +32,7 @@ const io = new Server(server, {
   cors: {
     origin: "http://localhost:8080",
     methods: ["GET", "POST"],
-  }
+  },
 });
 
 const state: State = {
@@ -38,7 +47,6 @@ const state: State = {
  * Returns: GameInfo (json)
  */
 app.get("/api/gameInfo", (req, res) => {
-
   const gameId = req.params.gameId;
   if (!gameId) throw "No game id specified";
 
@@ -60,19 +68,14 @@ app.get("/api/gameInfo", (req, res) => {
  * Returns: CreateGame (json)
  */
 app.get("/api/createGame", (_req, res) => {
-
   const gameId = uuidV4();
   state.games[gameId] = new Game();
 
   const data: CreateGame = {
-    gameId
+    gameId,
   };
 
   res.json(data);
-});
-
-app.get("/api/testing/state", (_req, res) => {
-  res.json(state);
 });
 
 io.on("connection", (socket: Socket) => {
@@ -125,19 +128,31 @@ io.on("connection", (socket: Socket) => {
           return;
         }
       }
+    }
 
+    // Check name
+    if (!data.name) {
+      error("Nickname required");
+      return;
+    } else {
+      const validateName = validateNickname(data.name);
+      if (validateName != true) {
+        error(validateName);
+        return;
+      }
     }
 
     const userId = uuidV4();
     console.log(`Generating user id... ${userId}`);
+
     game.people.set(userId, new Person(data.name, data.role, data.side));
     console.log("game.people:", game.people);
+
     socket.join(data.gameId);
     emitBoardUpdate(data.gameId);
     socket.emit(USER_ID_EVENT, userId);
     socket.emit(READY_EVENT);
-    state.socketInfo.get(socket)!.userId = userId; // TODO: add this to .d.ts
-
+    state.socketInfo.get(socket)!.userId = userId;
   });
 
   socket.on(MAKE_MOVE_EVENT, (data: string) => {
@@ -152,8 +167,8 @@ io.on("connection", (socket: Socket) => {
     const person = game.people.get(userId)!;
     const move = deserialize(Move, data);
 
-
-    if (!game.board.checkMove(move) ||
+    if (
+      !game.board.checkMove(move) ||
       person.role != PersonRole.Player ||
       person.side != game.board.currentSide
     ) {
@@ -176,7 +191,7 @@ io.on("connection", (socket: Socket) => {
     if (!gameId) return;
 
     state.games[gameId].people.delete(userId);
-  })
+  });
 });
 
 function findGamePersonIsIn(personId: string): string | null {

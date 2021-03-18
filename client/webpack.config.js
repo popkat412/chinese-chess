@@ -18,6 +18,9 @@ module.exports = {
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
+    alias: {
+      vue: "vue/dist/vue.esm.browser.js",
+    }
   },
   output: {
     filename: 'bundle.js',
@@ -26,7 +29,8 @@ module.exports = {
   plugins: [
     new CopyPlugin({
       patterns: [
-        { from: "index.html", to: path.resolve(distPath, "index.html") }
+        { from: "index.html", to: path.resolve(distPath, "index.html") },
+        { from: "styles.css", to: path.resolve(distPath, "styles.css") },
       ]
     }),
   ]

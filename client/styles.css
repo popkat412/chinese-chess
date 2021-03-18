@@ -1,0 +1,25 @@
+#app {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+.container {
+  border: 1px solid black;
+  border-radius: 10px;
+  width: 30vw;
+  padding: 10px;
+  margin: 10px;
+}
+
+#landing-container {
+  display: flex;
+  flex-direction: row;
+}
+
+@media (max-width: 800px) {
+  .flex-container {
+    flex-direction: column;
+  }
+}
