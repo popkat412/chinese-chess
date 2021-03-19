@@ -1,3 +1,4 @@
+import { default as axiosStatic } from "axios";
 import { deserialize, serialize } from "class-transformer";
 import p5 from "p5";
 import "reflect-metadata";
@@ -19,14 +20,23 @@ import {
   USER_ID_EVENT,
 } from "../shared/events";
 import CreateGame from "../shared/models/create-game";
+import ValidateJoinResult from "../shared/models/validate-join-result";
 import validateNickname from "../shared/validation";
+
+//===============//
+//     AXIOS     //
+//===============//
+const axios = axiosStatic.create({
+  baseURL: `${__SERVER_URL__}/api/`,
+});
 
 //=================//
 //     GLOBALS     //
 //=================//
 
 declare global {
-  var __DEPLOY_URL__: string;
+  const __DEPLOY_URL__: string;
+  const __SERVER_URL__: string;
 }
 
 // DRAWING STUFF
@@ -47,9 +57,7 @@ let myUserId: string | null = null;
 //================//
 //     SERVER     //
 //================//
-const ENDPOINT = "http://localhost:3000/api/";
-
-const socket = io("http://localhost:3000", { autoConnect: false });
+const socket = io(__SERVER_URL__, { autoConnect: false });
 socket.onAny((event, ...args) => {
   console.info(`New socket event: ${event}, ${args}`);
 });
@@ -402,16 +410,20 @@ const vm = new Vue({
       this.showingCanvas = true;
     },
 
-    joinGamePressed() {
+    async joinGamePressed() {
       // Validate form inputs
       if (this.joinGameData.gameId.trim() == "") {
         alert("Game ID is required");
         return;
       }
 
-      const nicknameValidation = validateNickname(this.joinGameData.name);
-      if (nicknameValidation != true) {
-        alert(nicknameValidation);
+      console.log(`joinGameData: ${JSON.stringify(this.joinGameData)}`);
+      const res = (
+        await axios.post<ValidateJoinResult>("/validateJoin", this.joinGameData)
+      ).data;
+
+      if (!res.valid) {
+        alert(`Error: ${res.errorMessage}`);
         return;
       }
 
@@ -437,9 +449,7 @@ const vm = new Vue({
       }
 
       try {
-        const gameId = ((await fetch(ENDPOINT + "createGame").then((res) =>
-          res.json()
-        )) as CreateGame).gameId;
+        const gameId = (await axios.get<CreateGame>("/createGame")).data.gameId;
 
         this.gameId = gameId;
 

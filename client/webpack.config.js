@@ -38,7 +38,8 @@ module.exports = {
     }),
 
     new webpack.DefinePlugin({
-      __DEPLOY_URL__: JSON.stringify(nodeEnv == "production" ? "" : "https://localhost:8080"),
+      __DEPLOY_URL__: JSON.stringify(nodeEnv == "production" ? "" : "http://localhost:8080"),
+      __SERVER_URL__: JSON.stringify(nodeEnv == "production" ? "" : "http://localhost:3000"),
     }),
   ]
 };
