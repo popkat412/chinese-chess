@@ -8,9 +8,9 @@
     "dev-client": "NODE_ENV=development cd client && webpack serve",
     "build-server": "NODE_ENV=production cd server && tsc",
     "dev-server": "NODE_ENV=development cd server && ts-node-dev --respawn index.ts",
-    "run-server": "NODE_ENv=production cd server && ts-node .",
-    "build": "concurrently \"npm:build-*\"",
-    "dev": "concurrently -c black.bgGreen.bold,black.bgBlue.bold -n client,server \"npm:dev-client\" \"npm:dev-server\""
+    "run-server": "NODE_ENV=production cd server && ts-node .",
+    "build": "NODE_ENV=production concurrently \"npm:build-*\"",
+    "dev": "NODE_ENV=development concurrently -c black.bgGreen.bold,black.bgBlue.bold -n client,server \"npm:dev-client\" \"npm:dev-server\""
   },
   "keywords": [],
   "author": "",

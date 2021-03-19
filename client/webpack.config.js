@@ -5,6 +5,7 @@ const CopyPlugin = require('copy-webpack-plugin');
 const distPath = path.resolve(__dirname, "..", "dist", "client");
 const nodeEnv = process.env.NODE_ENV;
 
+
 module.exports = {
   entry: "./index.ts",
   mode: nodeEnv,

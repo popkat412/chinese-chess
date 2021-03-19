@@ -69,6 +69,13 @@ socket.on("disconnect", () => {
   vm.$data.showingCanvas = false;
 });
 
+//========================//
+//     URL Parameters     //
+//========================//
+const urlParamGameId = new URLSearchParams(window.location.search).get(
+  "gameId"
+);
+
 //================//
 //     SKETCH     //
 //================//
@@ -337,8 +344,12 @@ interface JoinGameFormData extends CreateGameFormData {
 
 interface VueData {
   showingCanvas: boolean;
+
+  createGameBoxStyle: object;
+
   joinGameData: JoinGameFormData;
   createGameData: CreateGameFormData;
+
   gameId: string | null;
 }
 
@@ -347,8 +358,15 @@ const vm = new Vue({
   data(): VueData {
     return {
       showingCanvas: false,
+
+      createGameBoxStyle: {
+        filter: `opacity(${urlParamGameId ? "20%" : "100%"})`,
+        // filter: `opacity(20%)`,
+        transition: "1s",
+      },
+
       joinGameData: {
-        gameId: "",
+        gameId: urlParamGameId ?? "",
         name: "",
         role: PersonRole.Player,
         side: PieceSide.Red,
@@ -358,7 +376,7 @@ const vm = new Vue({
         role: PersonRole.Player,
         side: PieceSide.Red,
       },
-      gameId: null,
+      gameId: urlParamGameId,
     };
   },
   computed: {
