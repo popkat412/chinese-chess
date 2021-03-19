@@ -4,13 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build": "npm run build-client",
+    "dev": "cross-env NODE_ENV=development concurrently -c black.bgGreen.bold,black.bgBlue.bold -n client,server \"npm:dev-client\" \"npm:dev-server\"",
     "build-client": "cd client && cross-env NODE_ENV=production webpack",
-    "dev-client": "cd client && cross-env NODE_ENV=development  webpack serve",
-    "build-server": "cd server && cross-env NODE_ENV=production tsc",
+    "dev-client": "cd client && cross-env NODE_ENV=development webpack serve",
     "dev-server": "cd server && cross-env NODE_ENV=development ts-node-dev --respawn index.ts",
-    "run-server": "cd server && cross-env NODE_ENV=production  ts-node .",
-    "build": "cross-env NODE_ENV=production concurrently \"npm:build-*\"",
-    "dev": "cross-env NODE_ENV=development concurrently -c black.bgGreen.bold,black.bgBlue.bold -n client,server \"npm:dev-client\" \"npm:dev-server\""
+    "run-server": "cd server && cross-env NODE_ENV=production ts-node ."
   },
   "keywords": [],
   "author": "",

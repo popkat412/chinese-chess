@@ -2,14 +2,14 @@ const path = require("path");
 const webpack = require("webpack");
 const CopyPlugin = require('copy-webpack-plugin');
 
-const distPath = path.resolve(__dirname, "..", "dist", "client");
+const distPath = path.resolve(__dirname, "..", "dist");
 const nodeEnv = process.env.NODE_ENV;
 
 
 module.exports = {
   entry: "./index.ts",
   mode: nodeEnv,
-  devtool: "inline-source-map",
+  devtool: nodeEnv == "production" ? undefined : "eval-cheap-source-map",
   module: {
     rules: [
       {
@@ -41,5 +41,8 @@ module.exports = {
       __DEPLOY_URL__: JSON.stringify(nodeEnv == "production" ? "" : "http://localhost:8080"),
       __SERVER_URL__: JSON.stringify(nodeEnv == "production" ? "" : "http://localhost:3000"),
     }),
-  ]
+  ],
+  performance: {
+    hints: false,
+  }
 };
