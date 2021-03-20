@@ -1,15 +1,17 @@
 const path = require("path");
 const webpack = require("webpack");
 const CopyPlugin = require('copy-webpack-plugin');
+const TerserPlugin = require("terser-webpack-plugin");
 
 const distPath = path.resolve(__dirname, "..", "dist");
 const nodeEnv = process.env.NODE_ENV;
 
+console.log(`nodeEnv: ${nodeEnv}`);
 
 module.exports = {
   entry: "./index.ts",
   mode: nodeEnv,
-  devtool: nodeEnv == "production" ? undefined : "eval-cheap-source-map",
+  devtool: nodeEnv == "production" ? "source-map" : "eval-cheap-source-map",
   module: {
     rules: [
       {
@@ -40,9 +42,14 @@ module.exports = {
     new webpack.DefinePlugin({
       __DEPLOY_URL__: JSON.stringify(nodeEnv == "production" ? "" : "http://localhost:8080"),
       __SERVER_URL__: JSON.stringify(nodeEnv == "production" ? "" : "http://localhost:3000"),
+      'process.env.NODE_ENV': JSON.stringify(nodeEnv),
     }),
   ],
   performance: {
     hints: false,
-  }
+  },
+  optimization: {
+    minimize: true,
+    minimizer: [new TerserPlugin()],
+  },
 };
