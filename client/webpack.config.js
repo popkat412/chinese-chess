@@ -24,7 +24,7 @@ module.exports = {
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
     alias: {
-      vue: "vue/dist/vue.esm.browser.js",
+      vue: nodeEnv == "production" ? "vue/dist/vue.esm.browser.min.js" : "vue/dist/vue.esm.browser.js",
     }
   },
   output: {
@@ -42,7 +42,6 @@ module.exports = {
     new webpack.DefinePlugin({
       __DEPLOY_URL__: JSON.stringify(nodeEnv == "production" ? "" : "http://localhost:8080"),
       __SERVER_URL__: JSON.stringify(nodeEnv == "production" ? "" : "http://localhost:3000"),
-      'process.env.NODE_ENV': JSON.stringify(nodeEnv),
     }),
   ],
   performance: {
@@ -50,6 +49,12 @@ module.exports = {
   },
   optimization: {
     minimize: true,
-    minimizer: [new TerserPlugin()],
+    minimizer: [new TerserPlugin({
+      terserOptions: {
+        compress: {
+          drop_console: true,
+        }
+      }
+    })],
   },
 };
