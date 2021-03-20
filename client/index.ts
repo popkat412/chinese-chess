@@ -36,7 +36,6 @@ const axios = axiosStatic.create({
 
 declare global {
   const __DEPLOY_URL__: string;
-  const __DEPLOY_URL__: string;
 }
 
 // DRAWING STUFF
