@@ -41,6 +41,7 @@ module.exports = {
 
     new webpack.DefinePlugin({
       __DEPLOY_URL__: JSON.stringify(nodeEnv == "production" ? "http://yunze.wang" : "http://localhost:8080"),
+      __SERVER_URL__: JSON.stringify(nodeEnv == "production" ? "http://yunze.wang" : "http://localhost:3000"),
     }),
   ],
   performance: {

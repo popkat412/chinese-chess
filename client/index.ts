@@ -27,7 +27,7 @@ import validateNickname from "../shared/validation";
 //     AXIOS     //
 //===============//
 const axios = axiosStatic.create({
-  baseURL: `${__DEPLOY_URL__}/api/`,
+  baseURL: `${__SERVER_URL__}/api/`,
 });
 
 //=================//
@@ -36,6 +36,7 @@ const axios = axiosStatic.create({
 
 declare global {
   const __DEPLOY_URL__: string;
+  const __SERVER_URL__: string;
 }
 
 // DRAWING STUFF
@@ -56,7 +57,7 @@ let myUserId: string | null = null;
 //================//
 //     SERVER     //
 //================//
-const socket = io(__DEPLOY_URL__, { autoConnect: false });
+const socket = io(__SERVER_URL__, { autoConnect: false });
 socket.onAny((event, ...args) => {
   console.info(`New socket event: ${event}, ${args}`);
 });

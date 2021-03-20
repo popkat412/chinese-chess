@@ -25,7 +25,9 @@ import validateNickname from "../shared/validation";
 import State from "./state";
 
 const __DEPLOY_URL__ =
-  process.env.NODE_ENV == "production" ? "" : "http://localhost:8080";
+  process.env.NODE_ENV == "production"
+    ? "http://yunze.wang"
+    : "http://localhost:8080";
 
 const app = express();
 app.use(morgan("dev"));
