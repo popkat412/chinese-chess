@@ -26,7 +26,7 @@ import State from "./state";
 
 const __DEPLOY_URL__ =
   process.env.NODE_ENV == "production"
-    ? "http://yunze.wang"
+    ? "https://yunze.wang"
     : "http://localhost:8080";
 
 const app = express();
