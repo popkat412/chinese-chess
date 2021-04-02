@@ -63,9 +63,13 @@ socket.onAny((event, ...args) => {
 });
 socket.on(GAME_UPDATE_EVENT, (data: string) => {
   game = deserialize(Game, data);
+  vm.$data.opponentName = game.getOpponentName(myUserId ?? "");
+  vm.$data.numSpectators = game.spectators.length;
 });
 socket.on(USER_ID_EVENT, (userId: string) => {
   myUserId = userId;
+  vm.$data.myName = game.getNameForPlayerWithId(userId);
+  vm.$data.opponentName = game.getOpponentName(myUserId ?? "");
   console.log(`My user id: ${myUserId}`);
 });
 socket.on(ERROR_EVENT, (error: string) => {
@@ -359,6 +363,11 @@ interface VueData {
   createGameData: CreateGameFormData;
 
   gameId: string | null;
+
+  myName: string;
+  opponentName: string;
+
+  numSpectators: number;
 }
 
 const vm = new Vue({
@@ -384,7 +393,12 @@ const vm = new Vue({
         role: PersonRole.Player,
         side: PieceSide.Red,
       },
+
       gameId: urlParamGameId,
+
+      myName: game.getNameForPlayerWithId(myUserId ?? ""),
+      opponentName: game.getOpponentName(myUserId ?? ""),
+      numSpectators: game.spectators.length,
     };
   },
   computed: {

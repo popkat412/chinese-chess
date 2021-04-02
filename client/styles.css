@@ -1,25 +1,94 @@
+/* ---------------
+      GENERAL
+   --------------- */
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  margin: 0px;
+  padding: 0px;
+  height: 100vh;
+  width: 100vw;
+}
+
 #app {
+  width: 100%;
+  height: 100%;
+}
+
+/* ---------------
+       LANDING
+   --------------- */
+#landing-container {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100vh;
-}
-
-.container {
-  border: 1px solid black;
-  border-radius: 10px;
-  width: 30vw;
-  padding: 10px;
-  margin: 10px;
-}
-
-#landing-container {
-  display: flex;
-  flex-direction: row;
+  height: 100%;
+  width: 100%;
 }
 
 @media (max-width: 800px) {
   .flex-container {
     flex-direction: column;
   }
+}
+
+.container {
+  border: 1px solid black;
+  border-radius: 10px;
+
+  width: 30%;
+
+  padding: 10px;
+  margin: 10px;
+}
+
+.landing-button {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 10px;
+}
+
+/* ---------------
+        GAME
+   --------------- */
+
+/* Grid */
+#game-container {
+  display: grid;
+  grid-template-columns: 1fr 4fr 1fr;
+  grid-template-areas:
+    "header header  header"
+    "left   canvas right"
+    "left   canvas right"
+    "footer footer  footer";
+}
+
+#game-container > header {
+  grid-area: header;
+  padding: 0px 10px 0px 10px;
+  border-bottom: 1px solid gray;
+}
+#game-container > footer {
+  grid-area: footer;
+  padding: 0px 10px 0px 10px;
+  border-top: 1px solid gray;
+}
+#left-sidebar {
+  grid-area: left;
+  padding: 10px;
+  border-right: 1px solid gray;
+}
+#right-sidebar {
+  grid-area: right;
+  padding: 10px;
+  border-left: 1px solid gray;
+}
+#canvas-container {
+  grid-area: canvas;
+}
+
+/* Canvas */
+#canvas-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

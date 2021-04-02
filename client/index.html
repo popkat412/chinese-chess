@@ -9,13 +9,28 @@
   </head>
   <body>
     <div id="app">
-      <div id="canvas-container" v-show="showingCanvas">
-        <button @click="leaveGamePressed">Leave Game</button>
-        <p>
-          Game ID: {{ gameId }}. Share this game ID with your friends to play!
-          Or, copy the link (click to copy):
-          <a :href="joinUrl" @click.prevent="copyJoinUrl">{{ joinUrl }}</a>
-        </p>
+      <div id="game-container" v-show="showingCanvas">
+        <!-- <div id="game-container"> -->
+        <header>
+          <p>{{ opponentName }}</p>
+        </header>
+        <aside id="left-sidebar">
+          <h2>Stuff</h2>
+          <button @click="leaveGamePressed">Leave Game</button>
+          <p>{{ numSpectators }} spectators</p>
+        </aside>
+        <div id="canvas-container"></div>
+        <aside id="right-sidebar">
+          <h2>Chat</h2>
+          <p>Coming soon</p>
+        </aside>
+        <footer>
+          <p style="float: left">
+            Game link:
+            <a :href="joinUrl" @click.prevent="copyJoinUrl">{{ joinUrl }}</a>
+          </p>
+          <p style="float: right">{{ myName }}</p>
+        </footer>
       </div>
       <div id="landing-container" v-show="!showingCanvas">
         <div class="container">
@@ -38,7 +53,7 @@
             <option value="black">Black</option>
           </select>
           <br />
-          <button @click="joinGamePressed">Join!</button>
+          <button @click="joinGamePressed" class="landing-button">Join!</button>
         </div>
         <div
           class="container"
@@ -61,7 +76,9 @@
             <option value="black">Black</option>
           </select>
           <br />
-          <button @click="createGamePressed">Create!</button>
+          <button @click="createGamePressed" class="landing-button">
+            Create!
+          </button>
         </div>
       </div>
     </div>
