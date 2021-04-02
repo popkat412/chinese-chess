@@ -170,7 +170,7 @@ io.on("connection", (socket: Socket) => {
     if (disconnect) socket.disconnect();
   }
 
-  function emitBoardUpdate(gameId: string) {
+  function emitGameUpdate(gameId: string) {
     const gameJson = serialize(state.games[gameId]);
     io.to(gameId).emit(GAME_UPDATE_EVENT, gameJson);
   }
@@ -193,7 +193,7 @@ io.on("connection", (socket: Socket) => {
     console.log("game.people:", game.people);
 
     socket.join(data.gameId);
-    emitBoardUpdate(data.gameId);
+    emitGameUpdate(data.gameId);
     socket.emit(USER_ID_EVENT, userId);
     socket.emit(READY_EVENT);
     state.socketInfo.get(socket)!.userId = userId;
@@ -221,7 +221,7 @@ io.on("connection", (socket: Socket) => {
     }
 
     game.board.move(move);
-    emitBoardUpdate(gameId);
+    emitGameUpdate(gameId);
   });
 
   socket.on("disconnect", () => {
@@ -235,6 +235,8 @@ io.on("connection", (socket: Socket) => {
     if (!gameId) return;
 
     state.games[gameId].people.delete(userId);
+
+    emitGameUpdate(gameId);
 
     // TODO: Delete games after 24 hours
   });
