@@ -60,6 +60,11 @@ export class Board {
     return false;
   }
 
+  // Checks if current person has checkmated the other person
+  checkMate(): boolean {
+    throw new Error("Not implemented");
+  }
+
   // This returns fully legal moves
   availableMoves(piecePos: Pair): Move[] {
     const piece = this.grid[piecePos.first][piecePos.second];
@@ -143,4 +148,3 @@ export class Board {
     return tmp;
   }
 }
-

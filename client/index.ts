@@ -126,10 +126,10 @@ new p5((p: p5) => {
     p.background(200);
 
     drawBoard();
-    drawLatestMove();
     drawPieces();
     drawPieceBeingDragged();
     drawAvailablePositions();
+    drawLatestMove();
   };
 
   p.mousePressed = () => {
@@ -317,33 +317,6 @@ new p5((p: p5) => {
     );
   }
 
-  function drawLatestMove() {
-    if (!game.board.latestMove) return;
-
-    p.push();
-    p.rectMode(p.CENTER);
-
-    // From
-    const fromPos = coordToCanvasPos(game.board.latestMove.from);
-    p.rect(
-      fromPos.first,
-      fromPos.second,
-      GRID_SQUARE_SIZE / 2,
-      GRID_SQUARE_SIZE / 2
-    );
-
-    // To
-    const toPos = coordToCanvasPos(game.board.latestMove.to);
-    p.rect(
-      toPos.first,
-      toPos.second,
-      GRID_SQUARE_SIZE + 10,
-      GRID_SQUARE_SIZE + 10
-    );
-
-    p.pop();
-  }
-
   function drawPieces() {
     // TODO: Draw the side you're on as the bottom
     for (let i = 0; i < NUM_RANKS; i++) {
@@ -379,6 +352,36 @@ new p5((p: p5) => {
         p.ellipse(canvasPos.first, canvasPos.second, PIECE_SIZE / 2);
       }
     }
+  }
+
+  function drawLatestMove() {
+    if (!game.board.latestMove) return;
+
+    p.push();
+
+    p.rectMode(p.CENTER);
+    p.stroke(100);
+    p.noFill();
+
+    // From
+    const fromPos = coordToCanvasPos(game.board.latestMove.from);
+    p.rect(
+      fromPos.first,
+      fromPos.second,
+      GRID_SQUARE_SIZE / 2,
+      GRID_SQUARE_SIZE / 2
+    );
+
+    // To
+    const toPos = coordToCanvasPos(game.board.latestMove.to);
+    p.rect(
+      toPos.first,
+      toPos.second,
+      GRID_SQUARE_SIZE + 2,
+      GRID_SQUARE_SIZE + 2
+    );
+
+    p.pop();
   }
 });
 
