@@ -66,9 +66,11 @@ socket.on(GAME_UPDATE_EVENT, (data: string) => {
   vm.$data.opponentName = game.getOpponentName(myUserId ?? "");
   vm.$data.numSpectators = game.spectators.length;
   vm.$data.whosTurn = game.board.currentSide;
+  updateGameLink();
 });
 socket.on(USER_ID_EVENT, (userId: string) => {
   myUserId = userId;
+
   vm.$data.myName = game.getNameForPlayerWithId(userId);
   vm.$data.opponentName = game.getOpponentName(myUserId ?? "");
 
@@ -90,9 +92,15 @@ socket.on("disconnect", () => {
 //========================//
 //     URL Parameters     //
 //========================//
-const urlParamGameId = new URLSearchParams(window.location.search).get(
-  "gameId"
-);
+const urlParams = new URLSearchParams(window.location.search);
+const urlParamGameId = urlParams.get("gameId");
+
+const urlParamSide: PieceSide =
+  urlParams.get("side") == PieceSide.Black ? PieceSide.Black : PieceSide.Red;
+const urlParamsRole: PersonRole =
+  urlParams.get("role") == PersonRole.Spectator
+    ? PersonRole.Spectator
+    : PersonRole.Player;
 
 //================//
 //     SKETCH     //
@@ -376,6 +384,8 @@ interface VueData {
   whosTurn: string;
 
   numSpectators: number;
+
+  joinUrl: string;
 }
 
 const vm = new Vue({
@@ -393,8 +403,8 @@ const vm = new Vue({
       joinGameData: {
         gameId: urlParamGameId ?? "",
         name: "",
-        role: PersonRole.Player,
-        side: PieceSide.Red,
+        role: urlParamsRole ?? PersonRole.Player,
+        side: urlParamSide ?? PieceSide.Red,
       },
       createGameData: {
         name: "",
@@ -409,12 +419,9 @@ const vm = new Vue({
       numSpectators: game.spectators.length,
       role: "",
       whosTurn: "",
+
+      joinUrl: "",
     };
-  },
-  computed: {
-    joinUrl(): string {
-      return `${__DEPLOY_URL__}/?gameId=${this.gameId}`;
-    },
   },
   methods: {
     async copyJoinUrl() {
@@ -497,3 +504,19 @@ const vm = new Vue({
     },
   },
 });
+
+function updateGameLink(): void {
+  console.log(game.people);
+  let s = `${__DEPLOY_URL__}/?gameId=${vm.$data.gameId}`;
+  if (game.players.length >= 2) {
+    s += "&role=Spectator";
+  } else {
+    if (game.players.filter((v) => v.side == PieceSide.Red).length > 0) {
+      s += "&side=black";
+    } else {
+      s += "&side=red";
+    }
+  }
+
+  vm.$data.joinUrl = s;
+}
