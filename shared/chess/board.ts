@@ -1,5 +1,11 @@
-import { Transform, Type } from "class-transformer";
-import { NUM_FILES, NUM_RANKS, OPPOSITE_SIDE, PIECE_FROM_FEN, STARTING_POSITION_FEN } from "../constants";
+import { Exclude, Transform, Type } from "class-transformer";
+import {
+  NUM_FILES,
+  NUM_RANKS,
+  OPPOSITE_SIDE,
+  PIECE_FROM_FEN,
+  STARTING_POSITION_FEN,
+} from "../constants";
 import Pair from "../ds/pair";
 import create2dArray from "../utilities/2d-array";
 import { generateFullyLegalMoves } from "./fully-legal-moves";
@@ -7,11 +13,9 @@ import Move from "./move";
 import { MOVE_GENERATORS } from "./move-generator";
 import { Piece, PieceSide, PieceType } from "./piece";
 
-
 export type PieceGrid = (Piece | null)[][];
 
 export class Board {
-
   /// The pieces are represented as objects in a 2D array.
   /// Pieces are accessed using `grid[rank][file]`.
   /// (0, 0) is the top left of the grid.
@@ -19,17 +23,30 @@ export class Board {
   /// However, the pieces may be drawn to the screen differently
   @Type(() => Array)
   @Transform(({ obj }) => {
-    return obj.grid.map((v1: any) => v1.map((v2: any) => { if (v2) return new Piece(v2.type, v2.side); else return null; }));
+    return obj.grid.map((v1: any) =>
+      v1.map((v2: any) => {
+        if (v2) return new Piece(v2.type, v2.side);
+        else return null;
+      })
+    );
   })
   readonly grid: PieceGrid;
 
   currentSide: PieceSide;
 
+  @Type(() => Move)
+  readonly moveStack: Move[] = [];
+
+  @Exclude()
+  get latestMove(): Move | null {
+    if (this.moveStack.length < 1) return null;
+    return this.moveStack[this.moveStack.length - 1];
+  }
+
   constructor(fen: string = STARTING_POSITION_FEN) {
     this.grid = this.gridFromFen(fen);
     this.currentSide = PieceSide.Red;
   }
-
 
   log(): void {
     console.table(this.grid.map((v) => v.map((v2) => v2?.type)));
@@ -47,7 +64,10 @@ export class Board {
   availableMoves(piecePos: Pair): Move[] {
     const piece = this.grid[piecePos.first][piecePos.second];
     if (piece) {
-      return generateFullyLegalMoves(this, MOVE_GENERATORS[piece.type](piecePos, this.grid));
+      return generateFullyLegalMoves(
+        this,
+        MOVE_GENERATORS[piece.type](piecePos, this.grid)
+      );
     } else {
       return [];
     }
@@ -56,17 +76,24 @@ export class Board {
   move(move: Move): void {
     if (move.to.equals(move.from)) return;
     move.capturedPiece = this.grid[move.to.first][move.to.second];
-    this.grid[move.to.first][move.to.second] = this.grid[move.from.first][move.from.second];
+    this.grid[move.to.first][move.to.second] = this.grid[move.from.first][
+      move.from.second
+    ];
     this.grid[move.from.first][move.from.second] = null;
-
+    this.moveStack.push(move);
     this.swapPlayer();
   }
 
   unmove(move: Move): void {
     if (move.to.equals(move.from)) return;
-    this.grid[move.from.first][move.from.second] = this.grid[move.to.first][move.to.second];
+    this.grid[move.from.first][move.from.second] = this.grid[move.to.first][
+      move.to.second
+    ];
     this.grid[move.to.first][move.to.second] = move.capturedPiece;
-
+    this.moveStack.splice(
+      this.moveStack.findIndex((v) => v == move),
+      1
+    );
     this.swapPlayer();
   }
 
@@ -106,7 +133,7 @@ export class Board {
         } else {
           tmp[rank][file] = new Piece(
             PIECE_FROM_FEN[char.toUpperCase()],
-            /[A-Z]/.test(char) ? PieceSide.Red : PieceSide.Black,
+            /[A-Z]/.test(char) ? PieceSide.Red : PieceSide.Black
           );
           file++;
         }
@@ -116,3 +143,4 @@ export class Board {
     return tmp;
   }
 }
+
