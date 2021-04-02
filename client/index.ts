@@ -506,8 +506,10 @@ const vm = new Vue({
 });
 
 function updateGameLink(): void {
-  console.log(game.people);
   let s = `${__DEPLOY_URL__}/?gameId=${vm.$data.gameId}`;
+
+  window.history.replaceState({}, "Chinese Chess", s);
+
   if (game.players.length >= 2) {
     s += "&role=Spectator";
   } else {
