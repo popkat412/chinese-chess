@@ -86,6 +86,12 @@ body {
   grid-area: canvas;
 }
 
+/* Misc */
+#game-container > header {
+  display: flex;
+  flex-direction: row;
+}
+
 /* Canvas */
 #canvas-container {
   display: flex;

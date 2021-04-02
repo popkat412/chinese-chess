@@ -65,11 +65,17 @@ socket.on(GAME_UPDATE_EVENT, (data: string) => {
   game = deserialize(Game, data);
   vm.$data.opponentName = game.getOpponentName(myUserId ?? "");
   vm.$data.numSpectators = game.spectators.length;
+  vm.$data.whosTurn = game.board.currentSide;
 });
 socket.on(USER_ID_EVENT, (userId: string) => {
   myUserId = userId;
   vm.$data.myName = game.getNameForPlayerWithId(userId);
   vm.$data.opponentName = game.getOpponentName(myUserId ?? "");
+
+  const person = game.people.get(myUserId);
+  vm.$data.role =
+    person?.role == PersonRole.Player ? person?.side : "spectating";
+
   console.log(`My user id: ${myUserId}`);
 });
 socket.on(ERROR_EVENT, (error: string) => {
@@ -366,6 +372,8 @@ interface VueData {
 
   myName: string;
   opponentName: string;
+  role: string;
+  whosTurn: string;
 
   numSpectators: number;
 }
@@ -397,8 +405,10 @@ const vm = new Vue({
       gameId: urlParamGameId,
 
       myName: game.getNameForPlayerWithId(myUserId ?? ""),
-      opponentName: game.getOpponentName(myUserId ?? ""),
+      opponentName: game.getOpponentName(myUserId ?? "No opponent yet"),
       numSpectators: game.spectators.length,
+      role: "",
+      whosTurn: "",
     };
   },
   computed: {
