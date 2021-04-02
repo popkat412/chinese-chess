@@ -48,11 +48,13 @@
             <option value="Spectator">Spectator</option>
           </select>
           <br />
+          <div :class="{ dimmed: joinGameData.role == 'Spectator' }">
           <label for="join:side">Role</label>
-          <select id="join:side" v-model="joinGameData.side">
+          <select id="join:side" v-model="joinGameData.side" :disabled="joinGameData.role == 'Spectator'">
             <option value="red">Red</option>
             <option value="black">Black</option>
           </select>
+          </div>
           <br />
           <button @click="joinGamePressed" class="landing-button">Join!</button>
         </div>
