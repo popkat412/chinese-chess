@@ -153,6 +153,16 @@ function validateJoinGameData(data: JoinGameData): ValidateJoinResult {
         errorMessage: validateName,
       };
     }
+    // Check if duplicate
+    if (
+      Array.from(game.people.values()).filter((v) => v.name == data.name)
+        .length > 0
+    ) {
+      return {
+        valid: false,
+        errorMessage: "Somebody else already has that name",
+      };
+    }
   }
 
   return {
