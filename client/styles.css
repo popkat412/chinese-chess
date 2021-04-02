@@ -92,6 +92,19 @@ body {
   flex-direction: row;
 }
 
+/* Name labels */
+#oppoennt-name {
+  border-right: 1px solid gray;
+  float: left;
+  padding-right: 10px;
+}
+
+#my-name {
+  border-left: 1px solid gray;
+  float: right;
+  padding-left: 10px;
+}
+
 /* Canvas */
 #canvas-container {
   display: flex;

@@ -12,7 +12,7 @@
       <div id="game-container" v-show="showingCanvas">
         <!-- <div id="game-container"> -->
         <header>
-          <p>{{ opponentName }}</p>
+          <p id="oppoennt-name">{{ opponentName }}</p>
           <p style="width: 100%; text-align: center">You're {{ role }} | It's {{ whosTurn }}'s turn</p>
         </header>
         <aside id="left-sidebar">
@@ -30,7 +30,7 @@
             Game link:
             <a :href="joinUrl" @click.prevent="copyJoinUrl">{{ joinUrl }}</a>
           </p>
-          <p style="float: right">{{ myName }}</p>
+          <p id="my-name">{{ myName }}</p>
         </footer>
       </div>
       <div id="landing-container" v-show="!showingCanvas">

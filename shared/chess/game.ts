@@ -33,8 +33,10 @@ export default class Game {
   }
 
   getOpponentName(currentPlayerId: string): string {
+    const defaultName = "No opponent yet";
+
     const currentPlayerSide = this.people.get(currentPlayerId)?.side;
-    if (!currentPlayerSide) return "";
+    if (!currentPlayerSide) return defaultName;
 
     for (const [, person] of this.people) {
       if (
@@ -45,6 +47,6 @@ export default class Game {
       }
     }
 
-    return "";
+    return defaultName;
   }
 }
