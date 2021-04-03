@@ -17,6 +17,7 @@ import {
   JoinGameData,
   JOIN_GAME_EVENT,
   MAKE_MOVE_EVENT,
+  READY_EVENT,
   USER_ID_EVENT,
 } from "../shared/events";
 import CreateGame from "../shared/models/create-game";
@@ -79,6 +80,9 @@ socket.on(USER_ID_EVENT, (userId: string) => {
     person?.role == PersonRole.Player ? person?.side : "spectating";
 
   console.log(`My user id: ${myUserId}`);
+});
+socket.on(READY_EVENT, () => {
+  vm.$data.showingCanvas = true;
 });
 socket.on(ERROR_EVENT, (error: string) => {
   console.error(`Socket returned error: ${error}`);
@@ -469,7 +473,8 @@ const vm = new Vue({
       socket.connect();
       socket.emit(JOIN_GAME_EVENT, data);
 
-      this.showingCanvas = true;
+      // Showing canvas will be set to true when READY_EVENT is received,
+      // this is not a bug
     },
 
     async joinGamePressed() {
