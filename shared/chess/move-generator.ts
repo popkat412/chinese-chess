@@ -1,9 +1,9 @@
-import {NUM_FILES, NUM_RANKS} from "../constants";
+import { NUM_FILES, NUM_RANKS } from "../constants";
 import Pair from "../ds/pair";
 import multipleEquals from "../utilities/multiple-equals";
-import {PieceGrid} from "./board";
+import { PieceGrid } from "./board";
 import Move from "./move";
-import {PieceSide, PieceType} from "./piece";
+import { PieceSide, PieceType } from "./piece";
 
 // IMPORTANT: This only generates pseudo legal moves
 // aka it can allow itself to die when being checked
@@ -242,7 +242,7 @@ function pawnGenerator(position: Pair, board: PieceGrid): Move[] {
   }
 }
 
-export const MOVE_GENERATORS: {[k in PieceType]: MoveGenerator} = {
+export const MOVE_GENERATORS: { [k in PieceType]: MoveGenerator } = {
   Rook: rookGenerator,
   Horse: horseGenerator,
   Elephant: elephantGenerator,

@@ -142,8 +142,7 @@ new p5((p: p5) => {
     console.log(`mouse pressed: (${p.mouseX}, ${p.mouseY})`);
     console.log(`myUserId: ${myUserId}`);
     console.log(
-      `game.people.get(myUserId)?.side: ${
-        game.people.get(myUserId ?? "")?.side
+      `game.people.get(myUserId)?.side: ${game.people.get(myUserId ?? "")?.side
       }`
     );
 
@@ -450,7 +449,7 @@ const vm = new Vue({
       gameId: urlParamGameId,
 
       myName: game.getNameForPlayerWithId(myUserId ?? ""),
-      opponentName: game.getOpponentName(myUserId ?? "No opponent yet"),
+      opponentName: game.getOpponentName(myUserId ?? "No opponent"),
       numSpectators: game.spectators.length,
       role: "",
       whosTurn: "",
