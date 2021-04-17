@@ -25,3 +25,6 @@ export const MAKE_MOVE_EVENT = "makeMove";
 // Emitted when everything is loaded
 // No data
 export const READY_EVENT = "ready";
+
+// Data is PieceSide, *the side that got checkmated*
+export const CHECKMATE_EVENT = "checkmate";

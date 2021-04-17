@@ -4,8 +4,13 @@ import { Board } from "./board";
 import Person, { PersonRole } from "./person";
 
 export default class Game {
-  @Type(() => Board) board: Board = new Board();
-  @Type(() => Person) people: Map<string, Person> = new Map();
+  @Type(() => Board)
+  board: Board = new Board();
+
+  @Type(() => Person)
+  people: Map<string, Person> = new Map();
+
+  gameOver: boolean = false;
 
   @Exclude()
   get players(): Person[] {

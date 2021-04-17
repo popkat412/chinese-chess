@@ -10,6 +10,7 @@ import Game from "../shared/chess/game";
 import Move from "../shared/chess/move";
 import Person, { PersonRole } from "../shared/chess/person";
 import {
+  CHECKMATE_EVENT,
   ERROR_EVENT,
   GAME_UPDATE_EVENT,
   JoinGameData,
@@ -232,6 +233,12 @@ io.on("connection", (socket: Socket) => {
 
     game.board.move(move);
     emitGameUpdate(gameId);
+
+    // Check checkmate
+    if (game.board.checkCheckmate(game.board.currentSide)) {
+      console.log(`🔥 ${game.board.currentSide} got checkmated!`);
+      socket.emit(CHECKMATE_EVENT, game.board.currentSide)
+    }
   });
 
   socket.on("disconnect", () => {

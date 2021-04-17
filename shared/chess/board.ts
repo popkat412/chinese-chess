@@ -60,9 +60,24 @@ export class Board {
     return false;
   }
 
-  // Checks if current person has checkmated the other person
-  checkMate(): boolean {
-    throw new Error("Not implemented");
+  // Returns true if side is checkmated
+  checkCheckmate(side: PieceSide): boolean {
+    return this.allAvailableMoves(side).length == 0;
+  }
+
+  allAvailableMoves(side: PieceSide): Move[] {
+    const availableMoves: Move[] = [];
+
+    for (let i = 0; i < NUM_RANKS; i++) {
+      for (let j = 0; j < NUM_FILES; j++) {
+        if (this.grid[i][j]?.side == side) {
+          availableMoves.push(...this.availableMoves(new Pair(i, j)))
+        }
+      }
+    }
+
+    return availableMoves;
+
   }
 
   // This returns fully legal moves

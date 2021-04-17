@@ -9,9 +9,10 @@ import Move from "../shared/chess/move";
 import { generateAllMoves } from "../shared/chess/move-generator";
 import { PersonRole } from "../shared/chess/person";
 import { PieceSide } from "../shared/chess/piece";
-import { NUM_FILES, NUM_RANKS } from "../shared/constants";
+import { NUM_FILES, NUM_RANKS, OPPOSITE_SIDE } from "../shared/constants";
 import Pair from "../shared/ds/pair";
 import {
+  CHECKMATE_EVENT,
   ERROR_EVENT,
   GAME_UPDATE_EVENT,
   JoinGameData,
@@ -87,6 +88,10 @@ socket.on(READY_EVENT, () => {
 socket.on(ERROR_EVENT, (error: string) => {
   console.error(`Socket returned error: ${error}`);
   alert(`Socket returned error: ${error}`);
+});
+socket.on(CHECKMATE_EVENT, (checkmatedSide: PieceSide) => {
+  alert(`${OPPOSITE_SIDE[checkmatedSide]} won!`);
+  game.gameOver = true;
 });
 socket.on("disconnect", () => {
   myUserId = null;
