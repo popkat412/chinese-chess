@@ -1,5 +1,5 @@
-import type { PersonRole } from "@shared/chess/person";
-import type { PieceSide } from "@shared/chess/piece";
+import type { PersonRole } from "./chess/person";
+import type { PieceSide } from "./chess/piece";
 
 // No data
 export const ERROR_EVENT = "error";

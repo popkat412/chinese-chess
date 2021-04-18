@@ -1,19 +1,16 @@
-import Move from "@shared/chess/move";
-import {
-  generateAllMoves,
-  MOVE_GENERATORS,
-} from "@shared/chess/move-generator";
-import { Piece, PieceSide, PieceType } from "@shared/chess/piece";
+import { Exclude, Transform, Type } from "class-transformer";
 import {
   NUM_FILES,
   NUM_RANKS,
   OPPOSITE_SIDE,
   PIECE_FROM_FEN,
   STARTING_POSITION_FEN,
-} from "@shared/constants";
-import Pair from "@shared/ds/pair";
-import create2dArray from "@shared/utilities/2d-array";
-import { Exclude, Transform, Type } from "class-transformer";
+} from "../constants";
+import Pair from "../ds/pair";
+import create2dArray from "../utilities/2d-array";
+import Move from "./move";
+import { generateAllMoves, MOVE_GENERATORS } from "./move-generator";
+import { Piece, PieceSide, PieceType } from "./piece";
 
 export type PieceGrid = (Piece | null)[][];
 

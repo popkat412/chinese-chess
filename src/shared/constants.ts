@@ -1,4 +1,4 @@
-import { PieceSide, PieceType } from "@shared/chess/piece";
+import { PieceSide, PieceType } from "./chess/piece";
 
 const NUM_RANKS = 10;
 const NUM_FILES = 9;

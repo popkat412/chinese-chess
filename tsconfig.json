@@ -10,13 +10,9 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
+    "outDir": "./dist",
     "sourceMap": true,
-    "baseUrl": ".",
     "types": ["webpack-env"],
-    "paths": {
-      "@app/*": ["src/client/*"],
-      "@shared/*": ["src/shared/*"]
-    },
     "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
   },
   "include": [

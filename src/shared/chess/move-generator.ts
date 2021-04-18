@@ -1,10 +1,10 @@
 /* eslint-disable no-constant-condition */
-import type { PieceGrid } from "@shared/chess/board";
-import Move from "@shared/chess/move";
-import { PieceSide, PieceType } from "@shared/chess/piece";
-import { NUM_FILES, NUM_RANKS } from "@shared/constants";
-import Pair from "@shared/ds/pair";
-import multipleEquals from "@shared/utilities/multiple-equals";
+import { NUM_FILES, NUM_RANKS } from "../constants";
+import Pair from "../ds/pair";
+import multipleEquals from "../utilities/multiple-equals";
+import { PieceGrid } from "./board";
+import Move from "./move";
+import { PieceSide, PieceType } from "./piece";
 
 // IMPORTANT: This only generates pseudo legal moves
 // aka it can allow itself to die when being checked

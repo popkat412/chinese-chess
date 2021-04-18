@@ -11,11 +11,11 @@ module.exports = {
     entry: {
       app: path.join(clientPath, "main.ts"),
     },
-    resolve: {
-      alias: {
-        "@app": clientPath,
-        "@shared": sharedPath,
-      },
-    },
+    // resolve: {
+    //   alias: {
+    //     "@app": clientPath,
+    //     "@shared": sharedPath,
+    //   },
+    // },
   },
 };

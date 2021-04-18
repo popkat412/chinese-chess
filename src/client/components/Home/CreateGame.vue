@@ -25,8 +25,8 @@
 </template>
 
 <script lang="ts">
-import { PersonRole } from "@shared/chess/person";
-import { PieceSide } from "@shared/chess/piece";
+import { PersonRole } from "../../../shared/chess/person";
+import { PieceSide } from "../../../shared/chess/piece";
 import { Component, Vue } from "vue-property-decorator";
 
 @Component

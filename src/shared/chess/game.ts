@@ -1,7 +1,7 @@
-import { Board } from "@shared/chess/board";
-import Person, { PersonRole } from "@shared/chess/person";
-import { OPPOSITE_SIDE } from "@shared/constants";
 import { Exclude, Type } from "class-transformer";
+import { OPPOSITE_SIDE } from "../constants";
+import { Board } from "./board";
+import Person, { PersonRole } from "./person";
 
 export default class Game {
   @Type(() => Board)
