@@ -1,41 +1,45 @@
 <template>
-  <div
-    class="container"
-    :style="createGameBoxStyle"
-    @mouseenter="createGameBoxStyle.filter = 'opacity(100%)'"
-  >
-    <p>Create Game</p>
-    <label for="create:name">Nickname</label>
-    <input type="text" id="create:name" v-model="name" />
+  <div class="container">
+    <p>Join Game</p>
+    <label for="join:gameid">Game Id</label>
+    <input type="text" id="join:gameid" v-model="gameId" />
     <br />
-    <label for="create:role">Role</label>
-    <select id="create:role" v-model="role">
+    <label for="join:name">Nickname</label>
+    <input type="text" id="join:name" v-model="name" />
+    <br />
+    <label for="join:role">Role</label>
+    <select id="join:role" v-model="role">
       <option value="Player">Player</option>
       <option value="Spectator">Spectator</option>
     </select>
     <br />
-    <label for="create:side">Side</label>
-    <select id="create:side" v-model="side">
-      <option value="red">Red</option>
-      <option value="black">Black</option>
-    </select>
+    <div :class="{ dimmed: role == 'Spectator' }">
+      <label for="join:side">Side</label>
+      <select id="join:side" v-model="side" :disabled="role == 'Spectator'">
+        <option value="red">Red</option>
+        <option value="black">Black</option>
+      </select>
+    </div>
     <br />
-    <button @click="createGamePressed" class="landing-button">Create!</button>
+    <button @click="joinGamePressed" class="landing-button">Join!</button>
   </div>
 </template>
 
 <script lang="ts">
 import { PersonRole } from "@shared/chess/person";
 import { PieceSide } from "@shared/chess/piece";
-import { Vue } from "vue-property-decorator";
+import { Component, Vue } from "vue-property-decorator";
 
+@Component
 export default class JoinGame extends Vue {
+  gameId = "";
   name = "";
   role = PersonRole.Player;
   side = PieceSide.Red;
 
-  createGamePressed(): void {
-    console.log("Create game pressed");
+  joinGamePressed(): void {
+    console.log("Join game pressed");
+    this.$router.push("/game");
   }
 }
 </script>

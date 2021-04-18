@@ -13,17 +13,6 @@ const PIECE_FROM_FEN: { [k: string]: PieceType } = {
   H: PieceType.Horse,
   P: PieceType.Pawn,
 };
-const PIECE_CHINESE_CHARACTER: {
-  [k in PieceType]: { [kk in PieceSide]: string };
-} = {
-  Rook: { black: "車", red: "車" },
-  Horse: { black: "马", red: "马" },
-  Elephant: { black: "象", red: "相" },
-  Advisor: { black: "士", red: "仕" },
-  King: { black: "将", red: "帅" },
-  Cannon: { black: "炮", red: "砲" },
-  Pawn: { black: "卒", red: "兵" },
-};
 const OPPOSITE_SIDE: { [k in PieceSide]: PieceSide } = {
   black: PieceSide.Red,
   red: PieceSide.Black,
@@ -34,6 +23,5 @@ export {
   NUM_RANKS,
   PIECE_FROM_FEN,
   STARTING_POSITION_FEN,
-  PIECE_CHINESE_CHARACTER,
   OPPOSITE_SIDE,
 };

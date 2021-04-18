@@ -1,7 +1,7 @@
+import { Board } from "@shared/chess/board";
+import Person, { PersonRole } from "@shared/chess/person";
+import { OPPOSITE_SIDE } from "@shared/constants";
 import { Exclude, Type } from "class-transformer";
-import { OPPOSITE_SIDE } from "../constants";
-import { Board } from "./board";
-import Person, { PersonRole } from "./person";
 
 export default class Game {
   @Type(() => Board)
@@ -10,7 +10,7 @@ export default class Game {
   @Type(() => Person)
   people: Map<string, Person> = new Map();
 
-  gameOver: boolean = false;
+  gameOver = false;
 
   @Exclude()
   get players(): Person[] {
@@ -28,7 +28,7 @@ export default class Game {
 
   @Exclude()
   get availableRoles(): PersonRole[] {
-    let roles: PersonRole[] = [PersonRole.Spectator];
+    const roles: PersonRole[] = [PersonRole.Spectator];
     if (this.players.length < 2) roles.push(PersonRole.Player);
     return roles;
   }

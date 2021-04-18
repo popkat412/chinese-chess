@@ -1,4 +1,4 @@
-import { PersonRole } from "../chess/person";
+import { PersonRole } from "@shared/chess/person";
 
 export default interface GameInfo {
   availableRoles: PersonRole[];

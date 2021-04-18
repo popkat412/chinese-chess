@@ -1,17 +1,19 @@
-import { Exclude, Transform, Type } from "class-transformer";
+import Move from "@shared/chess/move";
+import {
+  generateAllMoves,
+  MOVE_GENERATORS,
+} from "@shared/chess/move-generator";
+import { Piece, PieceSide, PieceType } from "@shared/chess/piece";
 import {
   NUM_FILES,
   NUM_RANKS,
   OPPOSITE_SIDE,
   PIECE_FROM_FEN,
   STARTING_POSITION_FEN,
-} from "../constants";
-import Pair from "../ds/pair";
-import create2dArray from "../utilities/2d-array";
-import { generateFullyLegalMoves } from "./fully-legal-moves";
-import Move from "./move";
-import { MOVE_GENERATORS } from "./move-generator";
-import { Piece, PieceSide, PieceType } from "./piece";
+} from "@shared/constants";
+import Pair from "@shared/ds/pair";
+import create2dArray from "@shared/utilities/2d-array";
+import { Exclude, Transform, Type } from "class-transformer";
 
 export type PieceGrid = (Piece | null)[][];
 
@@ -83,7 +85,7 @@ export class Board {
   availableMoves(piecePos: Pair): Move[] {
     const piece = this.grid[piecePos.first][piecePos.second];
     if (piece) {
-      return generateFullyLegalMoves(
+      return this.generateFullyLegalMoves(
         this,
         MOVE_GENERATORS[piece.type](piecePos, this.grid)
       );
@@ -117,7 +119,7 @@ export class Board {
   }
 
   findPiece(type: PieceType, side: PieceSide): Pair[] {
-    let pos: Pair[] = [];
+    const pos: Pair[] = [];
     for (let i = 0; i < NUM_RANKS; i++) {
       for (let j = 0; j < NUM_FILES; j++) {
         const piece = this.grid[i][j];
@@ -134,13 +136,41 @@ export class Board {
     this.currentSide = OPPOSITE_SIDE[this.currentSide];
   }
 
+  private generateFullyLegalMoves(
+    board: Board,
+    pseudoLegalMoves: Move[]
+  ): Move[] {
+    const fullyLegalMoves: Move[] = [];
+
+    for (const move of pseudoLegalMoves) {
+      board.move(move);
+      const responses = generateAllMoves(board.grid, board.currentSide);
+      if (
+        responses.every(
+          (v) =>
+            !v.to.equals(
+              board.findPiece(
+                PieceType.King,
+                OPPOSITE_SIDE[board.currentSide]
+              )[0]
+            )
+        )
+      ) {
+        fullyLegalMoves.push(move);
+      }
+      board.unmove(move);
+    }
+
+    return this.filterKingMeetKingMoves(board, fullyLegalMoves);
+  }
+
   private gridFromFen(fen: string): PieceGrid {
     let file = 0;
     let rank = 9;
 
     fen = fen.split(" ")[0];
 
-    let tmp = create2dArray<Piece>(NUM_RANKS, NUM_FILES);
+    const tmp = create2dArray<Piece>(NUM_RANKS, NUM_FILES);
 
     for (const char of fen) {
       if (char == "/") {
@@ -160,5 +190,48 @@ export class Board {
     }
 
     return tmp;
+  }
+
+  private filterKingMeetKingMoves(board: Board, moves: Move[]): Move[] {
+    return moves.filter((move) => {
+      board.move(move);
+
+      // Check if kings are meeting
+      const redKingPos = board.findPiece(PieceType.King, PieceSide.Red)[0];
+      const blackKingPos = board.findPiece(PieceType.King, PieceSide.Black)[0];
+
+      // Check if same file
+      if (redKingPos.second != blackKingPos.second) {
+        board.unmove(move);
+        return true;
+      }
+
+      console.log(`move: ${move.from} -> ${move.to}`);
+      for (
+        let pos = redKingPos.copy();
+        pos.first >= 0 && pos.first < NUM_RANKS;
+        pos.first++
+      ) {
+        if (pos.equals(redKingPos)) continue;
+        console.log(`pos: ${pos}`);
+        const next = board.grid[pos.first][pos.second];
+        if (next) {
+          // Reached piece
+          // Check if is other king
+          if (next.type == PieceType.King) {
+            // Oops, illegal
+            board.unmove(move);
+            return false;
+          } else {
+            // Return true because this one got blocked by a piece
+            // Thus cannot reach king
+            board.unmove(move);
+            return true;
+          }
+        }
+      }
+
+      board.unmove(move);
+    });
   }
 }

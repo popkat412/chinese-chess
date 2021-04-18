@@ -1,6 +1,6 @@
+import { Piece } from "@shared/chess/piece";
+import Pair from "@shared/ds/pair";
 import { Exclude, Type } from "class-transformer";
-import Pair from "../ds/pair";
-import { Piece } from "./piece";
 
 export default class Move {
   @Type(() => Pair) from: Pair;

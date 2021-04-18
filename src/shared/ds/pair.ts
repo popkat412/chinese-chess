@@ -19,7 +19,7 @@ export default class Pair {
     return new Pair(this.first, this.second);
   }
 
-  toString() {
+  toString(): string {
     return `(${this.first}, ${this.second})`;
   }
 }

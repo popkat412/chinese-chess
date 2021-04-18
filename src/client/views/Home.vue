@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div id="home">
     <JoinGame />
     <CreateGame />
   </div>
@@ -7,8 +7,8 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import JoinGame from "../components/Home/JoinGame.vue";
 import CreateGame from "../components/Home/CreateGame.vue";
+import JoinGame from "../components/Home/JoinGame.vue";
 
 @Component({
   components: {

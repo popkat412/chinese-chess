@@ -1,5 +1,4 @@
 import p5 from "p5";
-import { PIECE_CHINESE_CHARACTER } from "../constants";
 
 export enum PieceType {
   Rook = "Rook",
@@ -15,6 +14,18 @@ export enum PieceSide {
   Black = "black",
   Red = "red",
 }
+
+export const PIECE_CHINESE_CHARACTER: {
+  [k in PieceType]: { [kk in PieceSide]: string };
+} = {
+  Rook: { black: "車", red: "車" },
+  Horse: { black: "马", red: "马" },
+  Elephant: { black: "象", red: "相" },
+  Advisor: { black: "士", red: "仕" },
+  King: { black: "将", red: "帅" },
+  Cannon: { black: "炮", red: "砲" },
+  Pawn: { black: "卒", red: "兵" },
+};
 
 export class Piece {
   type: PieceType;

@@ -1,4 +1,4 @@
-import { PieceSide } from "./piece";
+import { PieceSide } from "@shared/chess/piece";
 
 export enum PersonRole {
   Spectator = "Spectator",

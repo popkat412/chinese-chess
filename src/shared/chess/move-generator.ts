@@ -1,9 +1,10 @@
-import { NUM_FILES, NUM_RANKS } from "../constants";
-import Pair from "../ds/pair";
-import multipleEquals from "../utilities/multiple-equals";
-import { PieceGrid } from "./board";
-import Move from "./move";
-import { PieceSide, PieceType } from "./piece";
+/* eslint-disable no-constant-condition */
+import type { PieceGrid } from "@shared/chess/board";
+import Move from "@shared/chess/move";
+import { PieceSide, PieceType } from "@shared/chess/piece";
+import { NUM_FILES, NUM_RANKS } from "@shared/constants";
+import Pair from "@shared/ds/pair";
+import multipleEquals from "@shared/utilities/multiple-equals";
 
 // IMPORTANT: This only generates pseudo legal moves
 // aka it can allow itself to die when being checked
@@ -18,7 +19,7 @@ function rookGenerator(position: Pair, board: PieceGrid): Move[] {
   const dx = [0, 0, 1, -1];
   const dy = [1, -1, 0, 0];
 
-  let moves: Pair[] = [];
+  const moves: Pair[] = [];
 
   for (let i = 0; i < 4; i++) {
     let x = position.first;
@@ -60,7 +61,7 @@ function blockablePieceGenerator(
   const piece = board[position.first][position.second];
   if (!piece) return [];
 
-  let moves: Pair[] = [];
+  const moves: Pair[] = [];
 
   for (let i = 0; i < dx.length; i++) {
     const x = position.first + dx[i];
@@ -114,7 +115,7 @@ function kingBoxPieceGenerator(
   const piece = board[position.first][position.second];
   if (!piece) return [];
 
-  let moves: Pair[] = [];
+  const moves: Pair[] = [];
 
   for (let i = 0; i < dx.length; i++) {
     const x = position.first + dx[i];
@@ -168,7 +169,7 @@ function cannonGenerator(position: Pair, board: PieceGrid): Move[] {
   const dx = [0, 0, 1, -1];
   const dy = [1, -1, 0, 0];
 
-  let moves: Pair[] = [];
+  const moves: Pair[] = [];
 
   for (let i = 0; i < 4; i++) {
     let x = position.first;
@@ -221,7 +222,7 @@ function pawnGenerator(position: Pair, board: PieceGrid): Move[] {
 
   if (isAcrossRiver(position, piece.side)) {
     let dx: number[], dy: number[];
-    let moves: Move[] = [];
+    const moves: Move[] = [];
 
     if (piece.side == PieceSide.Red) {
       // remember, red is on top
