@@ -1,10 +1,18 @@
+import "reflect-metadata";
 import Vue from "vue";
+import VueSocketIO from "vue-socket.io-extended";
 import App from "./App.vue";
 import "./registerServiceWorker";
 import router from "./router";
-import store from "./store";
+import socket from "./socket";
+import { store } from "./store";
 
-Vue.config.productionTip = false;
+declare global {
+  const __DEPLOY_URL__: string;
+  const __SERVER_URL__: string;
+}
+
+Vue.use(VueSocketIO, socket, { store });
 
 new Vue({
   router,

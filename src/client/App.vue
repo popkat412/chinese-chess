@@ -4,6 +4,31 @@
   </div>
 </template>
 
+<script lang="ts">
+import { Component, Vue } from "vue-property-decorator";
+import { READY_EVENT } from "../shared/events";
+
+@Component({
+  // Most of the generic socket stuff will be under APp
+  sockets: {
+    connect() {
+      console.log("🔌 socket conencted");
+    },
+    disconnect() {
+      console.log("🔌 socket disconnected");
+    },
+  },
+})
+export default class App extends Vue {
+  created(): void {
+    // The reason this is here is so we can listen for a event with "variable" name.
+    this.$socket.$subscribe(READY_EVENT, () => {
+      this.$router.push("/game");
+    });
+  }
+}
+</script>
+
 <style>
 /* ---------------
       GENERAL

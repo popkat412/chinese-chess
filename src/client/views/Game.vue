@@ -3,7 +3,7 @@
     <header>
       <p id="oppoennt-name">{{ opponentName }}</p>
       <p style="width: 100%; text-align: center">
-        You're {{ role }} | It's {{ whosTurn }}'s turn
+        You're {{ myIdentity }} | {{ statusMsg }}
       </p>
     </header>
     <aside id="left-sidebar">
@@ -11,7 +11,7 @@
       <button @click="leaveGamePressed">Leave Game</button>
       <p>{{ numSpectators }} spectators</p>
     </aside>
-    <div id="canvas-container"></div>
+    <GameCanvas />
     <aside id="right-sidebar">
       <h2>Chat</h2>
       <p>Coming soon</p>
@@ -28,18 +28,36 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
+import GameCanvas from "../components/Game/GameCanvas.vue";
+import { Getter } from "vuex-class";
 
-@Component
-export default class Game extends Vue {}
+@Component({
+  components: { GameCanvas },
+})
+export default class Game extends Vue {
+  @Getter opponentName!: string | undefined;
+  @Getter myName!: string | undefined;
+  @Getter myIdentity!: string | undefined;
+  @Getter statusMsg!: string | undefined;
+  @Getter numSpectators!: string | undefined;
+  @Getter joinUrl!: string | undefined;
+
+  leaveGamePressed(): void {
+    console.log("Leave game pressed");
+    this.$router.back();
+  }
+
+  async copyJoinUrl(): Promise<void> {
+    if (!this.joinUrl) return;
+    await navigator.clipboard.writeText(this.joinUrl);
+    alert("Copied to clipboard!");
+  }
+}
 </script>
 
 <style scoped>
-/* ---------------
-        GAME
-   --------------- */
-
 /* Grid */
-#game-container {
+#game {
   display: grid;
   grid-template-columns: 1fr 4fr 1fr;
   grid-template-areas:
@@ -49,12 +67,12 @@ export default class Game extends Vue {}
     "footer footer  footer";
 }
 
-#game-container > header {
+#game > header {
   grid-area: header;
   padding: 0px 10px 0px 10px;
   border-bottom: 1px solid gray;
 }
-#game-container > footer {
+#game > footer {
   grid-area: footer;
   padding: 0px 10px 0px 10px;
   border-top: 1px solid gray;
@@ -69,12 +87,9 @@ export default class Game extends Vue {}
   padding: 10px;
   border-left: 1px solid gray;
 }
-#canvas-container {
-  grid-area: canvas;
-}
 
 /* Misc */
-#game-container > header {
+#game > header {
   display: flex;
   flex-direction: row;
 }
@@ -90,12 +105,5 @@ export default class Game extends Vue {}
   border-left: 1px solid gray;
   float: right;
   padding-left: 10px;
-}
-
-/* Canvas */
-#canvas-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 </style>

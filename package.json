@@ -10,6 +10,7 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "axios": "^0.21.1",
     "class-transformer": "^0.4.0",
     "core-js": "^3.6.5",
     "cors": "^2.8.5",
@@ -25,7 +26,9 @@
     "vue-class-component": "^7.2.3",
     "vue-property-decorator": "^9.1.2",
     "vue-router": "^3.2.0",
-    "vuex": "^3.4.0"
+    "vue-socket.io-extended": "^4.1.0",
+    "vuex": "^3.4.0",
+    "vuex-class": "^0.3.2"
   },
   "devDependencies": {
     "@types/morgan": "^1.9.2",

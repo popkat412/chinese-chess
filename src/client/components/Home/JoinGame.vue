@@ -29,6 +29,9 @@
 import { PersonRole } from "../../../shared/chess/person";
 import { PieceSide } from "../../../shared/chess/piece";
 import { Component, Vue } from "vue-property-decorator";
+import { JoinGameData, JOIN_GAME_EVENT } from "../../../shared/events";
+import axios from "../../axios";
+import ValidateJoinResult from "../../../shared/models/validate-join-result";
 
 @Component
 export default class JoinGame extends Vue {
@@ -36,10 +39,40 @@ export default class JoinGame extends Vue {
   name = "";
   role = PersonRole.Player;
   side = PieceSide.Red;
+  async joinGamePressed(): Promise<void> {
+    // Validate form inputs
+    if (this.gameId.trim() == "") {
+      alert("Game ID is required");
+      return;
+    }
 
-  joinGamePressed(): void {
-    console.log("Join game pressed");
-    this.$router.push("/game");
+    const joinGameData: JoinGameData = {
+      gameId: this.gameId,
+      name: this.name,
+      role: this.role,
+      side: this.side,
+    };
+
+    console.log(`joinGameData: ${JSON.stringify(joinGameData)}`);
+    const res = (
+      await axios.post<ValidateJoinResult>("/validateJoin", joinGameData)
+    ).data;
+
+    if (!res.valid) {
+      alert(`Error: ${res.errorMessage}`);
+      return;
+    }
+
+    // Prepare the data
+    const data: JoinGameData = {
+      gameId: this.gameId,
+      name: this.name,
+      role: this.role,
+      side: this.side,
+    };
+
+    // this.joinGame(data);
+    this.$emit("join-game", data);
   }
 }
 </script>

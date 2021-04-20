@@ -29,12 +29,12 @@ import State from "./state";
 const __DEPLOY_URL__ =
   process.env.NODE_ENV == "production"
     ? "https://xiangqi.yunze.wang"
-    : "http://localhost:8080";
+    : "https://localhost:8080";
 
 const app = express();
 app.use(morgan("dev"));
 app.use(express.json());
-app.use(cors({ origin: __DEPLOY_URL__ }));
+app.use(cors()); // TODO: Configure this to be stricter
 
 console.log(`Deploy url: ${__DEPLOY_URL__}`);
 

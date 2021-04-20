@@ -1,12 +1,15 @@
 import Vue from "vue";
 import Vuex from "vuex";
+import gameState from "./gameState";
 
 Vue.use(Vuex);
 
-export default new Vuex.Store({
-  state: {},
-  mutations: {},
-  actions: {},
-  modules: {},
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface RootState {}
+
+export const store = new Vuex.Store<RootState>({
+  modules: {
+    gameState,
+  },
   strict: process.env.NODE_ENV !== "production",
 });
