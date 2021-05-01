@@ -6,7 +6,7 @@
 import { serialize } from "class-transformer";
 import p5 from "p5";
 import { Vue, Component } from "vue-property-decorator";
-import { State } from "vuex-class";
+import { namespace } from "vuex-class";
 import Move from "../../../shared/chess/move";
 import { generateAllMoves } from "../../../shared/chess/move-generator";
 import { PersonRole } from "../../../shared/chess/person";
@@ -27,10 +27,12 @@ const CANVAS_HEIGHT = (NUM_RANKS - 1) * GRID_SQUARE_SIZE + V_PADDING * 2;
 const CANVAS_WIDTH = (NUM_FILES - 1) * GRID_SQUARE_SIZE + H_PADDING * 2;
 const PIECE_SIZE = 55;
 
+const gameState = namespace("gameState");
+
 @Component
 export default class GameCanvas extends Vue {
-  @State myUserId!: string | null;
-  @State game!: Game | null;
+  @gameState.State myUserId!: string | null;
+  @gameState.State game!: Game | null;
 
   mounted(): void {
     // p5 stuff here

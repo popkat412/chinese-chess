@@ -1,3 +1,4 @@
+import axios from "axios";
 import "reflect-metadata";
 import Vue from "vue";
 import VueSocketIO from "vue-socket.io-extended";
@@ -8,6 +9,8 @@ import socket from "./socket";
 import { store } from "./store";
 
 Vue.use(VueSocketIO, socket, { store });
+
+axios.defaults.baseURL = "/api";
 
 new Vue({
   router,

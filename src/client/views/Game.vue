@@ -29,21 +29,34 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import GameCanvas from "../components/Game/GameCanvas.vue";
-import { Getter } from "vuex-class";
+import { namespace } from "vuex-class";
+
+const gameState = namespace("gameState");
 
 @Component({
   components: { GameCanvas },
 })
 export default class Game extends Vue {
-  @Getter opponentName!: string | undefined;
-  @Getter myName!: string | undefined;
-  @Getter myIdentity!: string | undefined;
-  @Getter statusMsg!: string | undefined;
-  @Getter numSpectators!: string | undefined;
-  @Getter joinUrl!: string | undefined;
+  // State
+  @gameState.Getter opponentName!: string | undefined;
+  @gameState.Getter myName!: string | undefined;
+  @gameState.Getter myIdentity!: string | undefined;
+  @gameState.Getter statusMsg!: string | undefined;
+  @gameState.Getter numSpectators!: string | undefined;
+  @gameState.Getter joinUrl!: string | undefined;
+  @gameState.State game!: Game | null;
+
+  // Hooks
+  created(): void {
+    if (!this.game)
+      this.$router.replace({ path: "/", query: this.$route.query });
+  }
+
+  // Methods
 
   leaveGamePressed(): void {
     console.log("Leave game pressed");
+    this.$socket.client.disconnect();
     this.$router.back();
   }
 

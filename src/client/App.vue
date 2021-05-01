@@ -6,7 +6,10 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
+import { namespace } from "vuex-class";
 import { READY_EVENT } from "../shared/events";
+
+const gameState = namespace("gameState");
 
 @Component({
   // Most of the generic socket stuff will be under APp
@@ -20,11 +23,21 @@ import { READY_EVENT } from "../shared/events";
   },
 })
 export default class App extends Vue {
+  @gameState.State gameId!: string | null;
+
   created(): void {
     // The reason this is here is so we can listen for a event with "variable" name.
     this.$socket.$subscribe(READY_EVENT, () => {
-      this.$router.push("/game");
+      this.$router.push({
+        path: "/game",
+        // By the time the READY event is sent, the gameId should have already been sent over
+        query: this.gameId ? { gameId: this.gameId } : {},
+      });
     });
+  }
+
+  beforeDestroy(): void {
+    this.$socket.$unsubscribe(READY_EVENT);
   }
 }
 </script>

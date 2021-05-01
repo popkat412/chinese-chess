@@ -11,5 +11,5 @@ export const store = new Vuex.Store<RootState>({
   modules: {
     gameState,
   },
-  strict: process.env.NODE_ENV !== "production",
+  strict: false, // todo: document why this is here
 });

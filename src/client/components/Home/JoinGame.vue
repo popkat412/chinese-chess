@@ -5,7 +5,7 @@
     <input type="text" id="join:gameid" v-model="gameId" />
     <br />
     <label for="join:name">Nickname</label>
-    <input type="text" id="join:name" v-model="name" />
+    <input type="text" id="join:name" v-model="name" ref="nameInput" />
     <br />
     <label for="join:role">Role</label>
     <select id="join:role" v-model="role">
@@ -31,14 +31,37 @@ import { PieceSide } from "../../../shared/chess/piece";
 import { Component, Vue } from "vue-property-decorator";
 import { JoinGameData } from "../../../shared/events";
 import axios from "axios";
-import ValidateJoinResult from "../../../shared/models/validate-join-result";
+import ValidateJoinResult from "../../../shared/models/validateJoinResult";
+import { JoinGameActionPayload } from "../../store/gameState";
+import UrlParams from "../../../shared/models/urlParams";
 
 @Component
 export default class JoinGame extends Vue {
+  // State
   gameId = "";
   name = "";
   role = PersonRole.Player;
   side = PieceSide.Red;
+
+  // Hooks
+  created(): void {
+    const urlParams = (this.$route.query as unknown) as UrlParams;
+
+    if (urlParams.gameId) this.gameId = urlParams.gameId;
+    if (urlParams.role) this.role = urlParams.role;
+    if (urlParams.side) this.side = urlParams.side;
+  }
+
+  mounted(): void {
+    const urlParams = (this.$route.query as unknown) as UrlParams;
+
+    if (urlParams.gameId || urlParams.role || urlParams.side) {
+      console.log(this.$refs);
+      (this.$refs.nameInput as HTMLInputElement).focus();
+    }
+  }
+
+  // Methods
   async joinGamePressed(): Promise<void> {
     // Validate form inputs
     if (this.gameId.trim() == "") {
@@ -63,16 +86,11 @@ export default class JoinGame extends Vue {
       return;
     }
 
-    // Prepare the data
-    // const data: JoinGameData = {
-    //   gameId: this.gameId,
-    //   name: this.name,
-    //   role: this.role,
-    //   side: this.side,
-    // };
-
-    // this.joinGame(data);
-    // this.$emit("join-game", data);
+    const payload: JoinGameActionPayload = {
+      data: joinGameData,
+      socket: this.$socket.client,
+    };
+    this.$store.dispatch("gameState/joinGame", payload);
   }
 }
 </script>

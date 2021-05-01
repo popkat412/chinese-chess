@@ -28,6 +28,10 @@
 import { PersonRole } from "../../../shared/chess/person";
 import { PieceSide } from "../../../shared/chess/piece";
 import { Component, Vue } from "vue-property-decorator";
+import validateNickname from "../../../shared/validation";
+import axios from "axios";
+import CreateGameModel from "../../../shared/models/createGame";
+import { JoinGameActionPayload } from "../../store/gameState";
 
 @Component
 export default class CreateGame extends Vue {
@@ -39,8 +43,36 @@ export default class CreateGame extends Vue {
     filter: `opacity(${/*urlParamGameId ? "20%" : */ "100%"})`,
   };
 
-  createGamePressed(): void {
+  async createGamePressed(): Promise<void> {
     console.log("Create game pressed");
+
+    // Validate form inputs
+    const nicknameValidation = validateNickname(this.name);
+    if (nicknameValidation != true) {
+      alert(nicknameValidation);
+      return;
+    }
+
+    try {
+      const gameId = (await axios.get<CreateGameModel>("/createGame")).data
+        .gameId;
+      this.$store.commit("gameState/setGameId", gameId);
+
+      const payload: JoinGameActionPayload = {
+        data: {
+          gameId,
+          role: this.role,
+          name: this.name,
+          side: this.side,
+        },
+        socket: this.$socket.client,
+      };
+      this.$store.dispatch("gameState/joinGame", payload);
+    } catch (e) {
+      console.error(e);
+      alert(`Error creating game: ${e}`);
+      return;
+    }
   }
 }
 </script>

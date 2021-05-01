@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { deserialize, serialize } from "class-transformer";
-import cors from "cors";
 import express from "express";
 import http from "http";
 import morgan from "morgan";
@@ -20,9 +19,9 @@ import {
   READY_EVENT,
   USER_ID_EVENT,
 } from "../shared/events";
-import CreateGame from "../shared/models/create-game";
-import GameInfo from "../shared/models/game-info";
-import ValidateJoinResult from "../shared/models/validate-join-result";
+import CreateGameModel from "../shared/models/createGame";
+import GameInfo from "../shared/models/gameInfo";
+import ValidateJoinResult from "../shared/models/validateJoinResult";
 import validateNickname from "../shared/validation";
 import State from "./state";
 
@@ -31,7 +30,17 @@ app.use(morgan("dev"));
 app.use(express.json());
 
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(
+  server,
+  process.env.NODE_ENV == "production"
+    ? {}
+    : {
+        cors: {
+          origin: "*",
+          methods: ["GET", "POST"],
+        },
+      }
+);
 
 const state: State = {
   games: {},
@@ -69,7 +78,7 @@ app.get("/api/createGame", (_req, res) => {
   const gameId = uuidV4();
   state.games[gameId] = new Game();
 
-  const data: CreateGame = {
+  const data: CreateGameModel = {
     gameId,
   };
 
