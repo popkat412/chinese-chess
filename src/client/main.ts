@@ -7,11 +7,6 @@ import router from "./router";
 import socket from "./socket";
 import { store } from "./store";
 
-declare global {
-  const __DEPLOY_URL__: string;
-  const __SERVER_URL__: string;
-}
-
 Vue.use(VueSocketIO, socket, { store });
 
 new Vue({

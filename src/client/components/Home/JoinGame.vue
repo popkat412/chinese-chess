@@ -29,8 +29,8 @@
 import { PersonRole } from "../../../shared/chess/person";
 import { PieceSide } from "../../../shared/chess/piece";
 import { Component, Vue } from "vue-property-decorator";
-import { JoinGameData, JOIN_GAME_EVENT } from "../../../shared/events";
-import axios from "../../axios";
+import { JoinGameData } from "../../../shared/events";
+import axios from "axios";
 import ValidateJoinResult from "../../../shared/models/validate-join-result";
 
 @Component
@@ -64,15 +64,15 @@ export default class JoinGame extends Vue {
     }
 
     // Prepare the data
-    const data: JoinGameData = {
-      gameId: this.gameId,
-      name: this.name,
-      role: this.role,
-      side: this.side,
-    };
+    // const data: JoinGameData = {
+    //   gameId: this.gameId,
+    //   name: this.name,
+    //   role: this.role,
+    //   side: this.side,
+    // };
 
     // this.joinGame(data);
-    this.$emit("join-game", data);
+    // this.$emit("join-game", data);
   }
 }
 </script>

@@ -26,25 +26,12 @@ import ValidateJoinResult from "../shared/models/validate-join-result";
 import validateNickname from "../shared/validation";
 import State from "./state";
 
-const __DEPLOY_URL__ =
-  process.env.NODE_ENV == "production"
-    ? "https://xiangqi.yunze.wang"
-    : "https://localhost:8080";
-
 const app = express();
 app.use(morgan("dev"));
 app.use(express.json());
-app.use(cors()); // TODO: Configure this to be stricter
-
-console.log(`Deploy url: ${__DEPLOY_URL__}`);
 
 const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: __DEPLOY_URL__,
-    methods: ["GET", "POST"],
-  },
-});
+const io = new Server(server);
 
 const state: State = {
   games: {},
