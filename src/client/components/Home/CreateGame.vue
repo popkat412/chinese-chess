@@ -30,7 +30,7 @@ import { PieceSide } from "../../../shared/chess/piece";
 import { Component, Vue } from "vue-property-decorator";
 import { validateNickname } from "../../../shared/validation";
 import axios from "axios";
-import CreateGameModel from "../../../shared/models/createGame";
+import CreateGameModel from "../../../shared/models/createGameModel";
 import { JoinGameActionPayload } from "../../store/gameState";
 
 @Component

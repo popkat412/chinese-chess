@@ -1,10 +1,12 @@
 import { PersonRole } from "../shared/chess/person";
 import { JoinGameData } from "../shared/events";
-import ValidateJoinResult from "../shared/models/validateJoinResult";
+import ValidateJoinResultModel from "../shared/models/validateJoinResultModel";
 import { validateNickname } from "../shared/validation";
 import state from "./state";
 
-export function validateJoinGameData(data: JoinGameData): ValidateJoinResult {
+export function validateJoinGameData(
+  data: JoinGameData
+): ValidateJoinResultModel {
   // Check if game exists
   const game = state.games[data.gameId];
 

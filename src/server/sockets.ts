@@ -14,6 +14,7 @@ import {
   READY_EVENT,
   USER_ID_EVENT,
 } from "../shared/events";
+import { findGamePersonIsIn } from "./helpers";
 import state from "./state";
 import { validateJoinGameData } from "./validation";
 
@@ -104,14 +105,4 @@ export default function registerSocketListeners(io: Server): void {
       // TODO: Delete games after 24 hours
     });
   });
-
-  function findGamePersonIsIn(personId: string): string | null {
-    for (const gameId in state.games) {
-      if (state.games[gameId].people.has(personId)) {
-        return gameId;
-      }
-    }
-
-    return null;
-  }
 }

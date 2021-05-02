@@ -31,9 +31,9 @@ import { PieceSide } from "../../../shared/chess/piece";
 import { Component, Vue } from "vue-property-decorator";
 import { JoinGameData } from "../../../shared/events";
 import axios from "axios";
-import ValidateJoinResult from "../../../shared/models/validateJoinResult";
+import ValidateJoinResult from "../../../shared/models/validateJoinResultModel";
 import { JoinGameActionPayload } from "../../store/gameState";
-import UrlParams from "../../../shared/models/urlParams";
+import UrlParams from "../../../shared/models/urlParamsModel";
 
 @Component
 export default class JoinGame extends Vue {

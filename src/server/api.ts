@@ -2,8 +2,8 @@ import type { Express } from "express";
 import { v4 as uuidV4 } from "uuid";
 import Game from "../shared/chess/game";
 import { JoinGameData } from "../shared/events";
-import CreateGameModel from "../shared/models/createGame";
-import GameInfo from "../shared/models/gameInfo";
+import CreateGameModel from "../shared/models/createGameModel";
+import GameInfoModel from "../shared/models/gameInfoModel";
 import state from "./state";
 import { validateJoinGameData } from "./validation";
 
@@ -21,7 +21,7 @@ export default function registerEndpoints(app: Express): void {
     const game = state.games[gameId];
     if (!game) throw `No game with ${gameId} specified`;
 
-    const info: GameInfo = {
+    const info: GameInfoModel = {
       availableRoles: game.availableRoles,
       numPlayers: game.players.length,
     };
