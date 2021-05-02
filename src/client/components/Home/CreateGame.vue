@@ -28,7 +28,7 @@
 import { PersonRole } from "../../../shared/chess/person";
 import { PieceSide } from "../../../shared/chess/piece";
 import { Component, Vue } from "vue-property-decorator";
-import validateNickname from "../../../shared/validation";
+import { validateNickname } from "../../../shared/validation";
 import axios from "axios";
 import CreateGameModel from "../../../shared/models/createGame";
 import { JoinGameActionPayload } from "../../store/gameState";

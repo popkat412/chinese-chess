@@ -1,4 +1,4 @@
-export default function validateNickname(username: string): true | string {
+export function validateNickname(username: string): true | string {
   const notEmpty = username.trim().length != 0;
   const matchesRegex = /^\w+$/.test(username);
   const withinLengthLimit = username.length < 32;

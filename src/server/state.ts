@@ -5,7 +5,14 @@ interface SocketInfo {
   userId?: string;
 }
 
-export default interface State {
+export interface State {
   games: { [gameId: string]: Game };
   socketInfo: WeakMap<Socket, SocketInfo>;
 }
+
+const state: State = {
+  games: {},
+  socketInfo: new WeakMap(),
+};
+
+export default state;
