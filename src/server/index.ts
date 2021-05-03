@@ -14,10 +14,11 @@ app.use(express.json());
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin:
-      process.env.NODE_ENV == "production"
-        ? "https://xiangqi.yunze.wang"
-        : "http://localhost:8080",
+    // origin:
+    //   process.env.NODE_ENV == "production"
+    //     ? "https://xiangqi.yunze.wang"
+    //     : "http://localhost:8080",
+    origin: "*",
     methods: ["GET", "POST"],
   },
 });
