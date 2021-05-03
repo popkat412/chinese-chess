@@ -8,7 +8,7 @@
     "dev": "cross-env NODE_ENV=development concurrently -c black.bgGreen.bold,black.bgBlue.bold -n client,server \"npm:dev:client\" \"npm:dev:server\"",
     "build:client": "vue-cli-service build",
     "build:server": "cross-env NODE_ENV=production tsc -p tsconfig.server.json",
-    "build": "cross-env NODE_ENV=development concurrently -c black.bgGreen.bold,black.bgBlue.bold -n client,server \"npm:build:client\" \"npm:build:server\"",
+    "build": "cross-env NODE_ENV=production concurrently -c black.bgGreen.bold,black.bgBlue.bold -n client,server \"npm:build:client\" \"npm:build:server\"",
     "start": "cross-env NODE_ENV=production node server-dist/server/index.js",
     "lint": "vue-cli-service lint"
   },

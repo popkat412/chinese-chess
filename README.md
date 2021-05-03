@@ -5,6 +5,7 @@
 - Reset Vuex after disconnection
 - Checkmate
 - Rematch
+- CI build & deploy system
 - Responsive design / PWA
 - Chat
 - Delete games after 24 hours
