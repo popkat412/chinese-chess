@@ -77,6 +77,8 @@ export default class JoinGame extends Vue {
     };
 
     console.log(`joinGameData: ${JSON.stringify(joinGameData)}`);
+
+    // Validate form inputs
     const res = (
       await axios.post<ValidateJoinResult>("/validateJoin", joinGameData)
     ).data;
@@ -86,6 +88,8 @@ export default class JoinGame extends Vue {
       return;
     }
 
+    // Actual stuff
+    this.$store.commit("gameState/setGameId", this.gameId);
     const payload: JoinGameActionPayload = {
       data: joinGameData,
       socket: this.$socket.client,

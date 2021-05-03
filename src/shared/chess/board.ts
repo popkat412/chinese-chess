@@ -203,14 +203,14 @@ export class Board {
         return true;
       }
 
-      console.log(`move: ${move.from} -> ${move.to}`);
+      // console.log(`move: ${move.from} -> ${move.to}`);
       for (
         let pos = redKingPos.copy();
         pos.first >= 0 && pos.first < NUM_RANKS;
         pos.first++
       ) {
         if (pos.equals(redKingPos)) continue;
-        console.log(`pos: ${pos}`);
+        // console.log(`pos: ${pos}`);
         const next = board.grid[pos.first][pos.second];
         if (next) {
           // Reached piece

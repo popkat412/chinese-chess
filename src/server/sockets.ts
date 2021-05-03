@@ -2,11 +2,13 @@
 import { deserialize, serialize } from "class-transformer";
 import { Server, Socket } from "socket.io";
 import { v4 as uuidV4 } from "uuid";
+import { GameStatus } from "../shared/chess/game";
 import Move from "../shared/chess/move";
 import Person, { PersonRole } from "../shared/chess/person";
+import { OPPOSITE_SIDE } from "../shared/constants";
 import {
-  CHECKMATE_EVENT,
   ERROR_EVENT,
+  GAME_STATUS_CHANGED_EVENT,
   GAME_UPDATE_EVENT,
   JoinGameData,
   JOIN_GAME_EVENT,
@@ -84,7 +86,12 @@ export default function registerSocketListeners(io: Server): void {
       // Check checkmate
       if (game.board.checkCheckmate(game.board.currentSide)) {
         console.log(`🔥 ${game.board.currentSide} got checkmated!`);
-        socket.emit(CHECKMATE_EVENT, game.board.currentSide);
+
+        game.gameStatus = GameStatus.HasWinner;
+        game.winner = OPPOSITE_SIDE[game.board.currentSide];
+
+        emitGameUpdate(gameId);
+        io.to(gameId).emit(GAME_STATUS_CHANGED_EVENT, game.gameStatus);
       }
     });
 

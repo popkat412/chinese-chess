@@ -30,30 +30,40 @@
 import { Component, Vue } from "vue-property-decorator";
 import GameCanvas from "../components/Game/GameCanvas.vue";
 import { namespace } from "vuex-class";
+import { GAME_STATUS_CHANGED_EVENT } from "../../shared/events";
+import Game from "../../shared/chess/game";
 
 const gameState = namespace("gameState");
 
 @Component({
   components: { GameCanvas },
+  sockets: {
+    [GAME_STATUS_CHANGED_EVENT]: function (
+      this: GameComponent
+      // _newStatus: GameStatus
+    ) {
+      alert(this.game?.statusMsg);
+    },
+  },
 })
-export default class Game extends Vue {
+export default class GameComponent extends Vue {
   // State
   @gameState.Getter opponentName!: string | undefined;
   @gameState.Getter myName!: string | undefined;
   @gameState.Getter myIdentity!: string | undefined;
-  @gameState.Getter statusMsg!: string | undefined;
   @gameState.Getter numSpectators!: string | undefined;
   @gameState.Getter joinUrl!: string | undefined;
   @gameState.State game!: Game | null;
 
   // Hooks
   created(): void {
-    if (!this.game)
+    if (!this.game) {
       this.$router.replace({ path: "/", query: this.$route.query });
+      return;
+    }
   }
 
   // Methods
-
   leaveGamePressed(): void {
     console.log("Leave game pressed");
     this.$socket.client.disconnect();
@@ -64,6 +74,11 @@ export default class Game extends Vue {
     if (!this.joinUrl) return;
     await navigator.clipboard.writeText(this.joinUrl);
     alert("Copied to clipboard!");
+  }
+
+  // Getters
+  get statusMsg(): string | undefined {
+    return this.game?.statusMsg;
   }
 }
 </script>

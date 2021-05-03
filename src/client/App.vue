@@ -20,24 +20,27 @@ const gameState = namespace("gameState");
     disconnect() {
       console.log("🔌 socket disconnected");
     },
+    [READY_EVENT]: function (this: App): void {
+      this.$router.push({
+        path: "/game",
+        // By the time the READY event is sent, the gameId should have already been sent over
+        query: this.gameId ? { gameId: this.gameId } : {},
+      });
+    },
   },
 })
 export default class App extends Vue {
   @gameState.State gameId!: string | null;
 
   created(): void {
-    // The reason this is here is so we can listen for a event with "variable" name.
-    this.$socket.$subscribe(READY_EVENT, () => {
-      this.$router.push({
-        path: "/game",
-        // By the time the READY event is sent, the gameId should have already been sent over
-        query: this.gameId ? { gameId: this.gameId } : {},
-      });
+    this.$socket.client.onAny((event, args) => {
+      console.info(event, args);
     });
   }
 
   beforeDestroy(): void {
     this.$socket.$unsubscribe(READY_EVENT);
+    this.$socket.client.off();
   }
 }
 </script>

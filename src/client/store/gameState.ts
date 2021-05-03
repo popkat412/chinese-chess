@@ -53,27 +53,23 @@ const gameState: Module<GameState, RootState> = {
     },
   },
   getters: {
+    // The `Person` object belonging to the current player
     me: (state): Person | undefined => {
       return state.game?.people.get(state.myUserId ?? "");
     },
+    // The opponent's nickname
     opponentName: (state): string | undefined => {
       return state.game?.getOpponentName(state.myUserId ?? "");
     },
+    // The person's nickname
     myName: (_state, getters): string | undefined => {
       return getters.me?.name;
     },
+    // Could be "red", "black", or "spectating"
     myIdentity: (_state, getters): string | undefined => {
       const me = getters.me as Person;
       if (!me) return;
       return me.role == PersonRole.Player ? (me.side as string) : "spectating";
-    },
-    statusMsg: (state, getters): string | undefined => {
-      const me = getters.me as Person;
-      const game = state.game;
-      if (!me || !game) return;
-
-      if (game.gameOver) return `Game over`; // todo: provide more info
-      return `It's ${me.side}'s turn`;
     },
     numSpectators: (state): number | undefined => {
       return state.game?.spectators.length;

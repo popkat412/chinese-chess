@@ -12,14 +12,14 @@ export default function registerEndpoints(app: Express): void {
    * Endpoint: /api/gameInfo
    * Type: GET
    * Parameters: gameId
-   * Returns: GameInfo (json)
+   * Returns: GameInfoModel (json)
    */
   app.get("/api/gameInfo", (req, res) => {
     const gameId = req.params.gameId;
     if (!gameId) throw "No game id specified";
 
     const game = state.games[gameId];
-    if (!game) throw `No game with ${gameId} specified`;
+    if (!game) throw `No game with ${gameId}`;
 
     const info: GameInfoModel = {
       availableRoles: game.availableRoles,
@@ -33,7 +33,7 @@ export default function registerEndpoints(app: Express): void {
    * Endpoint: /api/createGame
    * Type: GET
    * Parameters: none
-   * Returns: CreateGame (json)
+   * Returns: CreateGameModel (json)
    */
   app.get("/api/createGame", (_req, res) => {
     const gameId = uuidV4();

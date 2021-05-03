@@ -16,8 +16,12 @@ export const GAME_UPDATE_EVENT = "game_update";
 // No data
 export const READY_EVENT = "ready";
 
-// Data is `PieceSide`, *the side that got checkmated*
-export const CHECKMATE_EVENT = "checkmate";
+// Emitted when the game status changes
+// Data is the new `GameStatus`
+// This is purely for convenience, you could just watch for changes on the
+// gameStatus property client side, but this is easier (also easier for be to introduce bugs later but whatever)
+// This should be emitted AFTER the actual game update event is emitted
+export const GAME_STATUS_CHANGED_EVENT = "game_status_changed";
 
 /****** From client *******/
 

@@ -2,8 +2,10 @@
 -------------------------------------------
 
 ## TODO
+- Reset Vuex after disconnection
 - Checkmate
-- Dynamic canvas size
+- Rematch
+- Responsive design / PWA
 - Chat
 - Delete games after 24 hours
 - Switch to redis

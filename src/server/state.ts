@@ -16,3 +16,11 @@ const state: State = {
 };
 
 export default state;
+
+// - get game with id
+// - set game with id
+// - find game person with id is in
+// - delete user with game
+
+// - set socket info to empty object
+// - get userId of socket info
