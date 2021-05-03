@@ -12,17 +12,12 @@ app.use(morgan("dev"));
 app.use(express.json());
 
 const server = http.createServer(app);
-const io = new Server(
-  server,
-  process.env.NODE_ENV == "production"
-    ? {}
-    : {
-        cors: {
-          origin: "*",
-          methods: ["GET", "POST"],
-        },
-      }
-);
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:8080",
+    methods: ["GET", "POST"],
+  },
+});
 
 registerEndpoints(app);
 registerSocketListeners(io);
