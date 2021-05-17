@@ -23,7 +23,16 @@ export const READY_EVENT = "ready";
 // This should be emitted AFTER the actual game update event is emitted
 export const GAME_STATUS_CHANGED_EVENT = "game_status_changed";
 
+// Emitted when the game expires (aka > 12 hours),
+// just before the game is deleted
+export const GAME_EXPIRED_EVENT = "game_expired";
+
 /****** From client *******/
+
+// No data
+// The created game's id will be sent back via acknowledgements
+// The shape of the callback should be (gameId: string) => void
+export const CREATE_GAME_EVENT = "create_game";
 
 // Data is object as described in `JoinGameData`
 export const JOIN_GAME_EVENT = "join_game";

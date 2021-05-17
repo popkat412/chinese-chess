@@ -29,12 +29,12 @@ import { PersonRole } from "../../../shared/chess/person";
 import { PieceSide } from "../../../shared/chess/piece";
 import { Component, Vue } from "vue-property-decorator";
 import { validateNickname } from "../../../shared/validation";
-import axios from "axios";
-import CreateGameModel from "../../../shared/models/createGameModel";
 import { JoinGameActionPayload } from "../../store/gameState";
+import { CREATE_GAME_EVENT } from "../../../shared/events";
 
 @Component
 export default class CreateGame extends Vue {
+  // State
   name = "";
   role = PersonRole.Player;
   side = PieceSide.Red;
@@ -43,6 +43,7 @@ export default class CreateGame extends Vue {
     filter: `opacity(${/*urlParamGameId ? "20%" : */ "100%"})`,
   };
 
+  // Methods
   async createGamePressed(): Promise<void> {
     console.log("Create game pressed");
 
@@ -54,8 +55,9 @@ export default class CreateGame extends Vue {
     }
 
     try {
-      const gameId = (await axios.get<CreateGameModel>("/createGame")).data
-        .gameId;
+      // const gameId = (await axios.get<CreateGameModel>("/createGame")).data
+      //  .gameId;
+      const gameId = await this.createGameAndGetId();
       this.$store.commit("gameState/setGameId", gameId);
 
       const payload: JoinGameActionPayload = {
@@ -73,6 +75,24 @@ export default class CreateGame extends Vue {
       alert(`Error creating game: ${e}`);
       return;
     }
+  }
+
+  // Helpers
+  async createGameAndGetId(): Promise<string> {
+    return new Promise((resolve, reject) => {
+      if (this.$socket.disconnected) {
+        this.$socket.client.connect();
+      }
+
+      this.$socket.client.emit(CREATE_GAME_EVENT, (response: any) => {
+        if (!response) {
+          reject("Error creating game");
+          return;
+        }
+
+        resolve(response);
+      });
+    });
   }
 }
 </script>

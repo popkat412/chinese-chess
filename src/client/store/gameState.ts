@@ -29,6 +29,11 @@ const gameState: Module<GameState, RootState> = {
     setGameId(state, payload: string): void {
       state.gameId = payload;
     },
+    reset(state): void {
+      state.game = null;
+      state.gameId = null;
+      state.myUserId = null;
+    },
     SOCKET_USER_ID(state, payload: string): void {
       state.myUserId = payload;
     },
@@ -39,13 +44,10 @@ const gameState: Module<GameState, RootState> = {
   modules: {},
   actions: {
     joinGame(_context, { data, socket }: JoinGameActionPayload): void {
-      if (socket.connected) {
-        console.warn("Socket already open");
-        alert("An unexpected error occurred");
-        return;
+      if (socket.disconnected) {
+        socket.connect();
       }
 
-      socket.connect();
       socket.emit(JOIN_GAME_EVENT, data);
 
       // Showing canvas will be set to true when READY_EVENT is received,

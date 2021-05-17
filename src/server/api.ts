@@ -1,50 +1,14 @@
 import type { Express } from "express";
-import { v4 as uuidV4 } from "uuid";
-import Game from "../shared/chess/game";
 import { JoinGameData } from "../shared/events";
-import CreateGameModel from "../shared/models/createGameModel";
-import GameInfoModel from "../shared/models/gameInfoModel";
 import state from "./state";
 import { validateJoinGameData } from "./validation";
 
 export default function registerEndpoints(app: Express): void {
-  /**
-   * Endpoint: /api/gameInfo
-   * Type: GET
-   * Parameters: gameId
-   * Returns: GameInfoModel (json)
-   */
-  app.get("/api/gameInfo", (req, res) => {
-    const gameId = req.params.gameId;
-    if (!gameId) throw "No game id specified";
-
-    const game = state.games[gameId];
-    if (!game) throw `No game with ${gameId}`;
-
-    const info: GameInfoModel = {
-      availableRoles: game.availableRoles,
-      numPlayers: game.players.length,
-    };
-
-    res.json(info);
+  // if (process.env.NODE_ENV == "development") {
+  app.get("/api/state", (_req, res) => {
+    res.json(state);
   });
-
-  /**
-   * Endpoint: /api/createGame
-   * Type: GET
-   * Parameters: none
-   * Returns: CreateGameModel (json)
-   */
-  app.get("/api/createGame", (_req, res) => {
-    const gameId = uuidV4();
-    state.games[gameId] = new Game();
-
-    const data: CreateGameModel = {
-      gameId,
-    };
-
-    res.json(data);
-  });
+  // }
 
   /**
    * Endpoint: /api/validateGame

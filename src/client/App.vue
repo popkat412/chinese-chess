@@ -19,6 +19,7 @@ const gameState = namespace("gameState");
     },
     disconnect() {
       console.log("🔌 socket disconnected");
+      this.$store.commit("gameState/reset");
     },
     [READY_EVENT]: function (this: App): void {
       this.$router.push({

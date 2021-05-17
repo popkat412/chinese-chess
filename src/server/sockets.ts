@@ -2,7 +2,7 @@
 import { deserialize, serialize } from "class-transformer";
 import { Server, Socket } from "socket.io";
 import { v4 as uuidV4 } from "uuid";
-import { GameStatus } from "../shared/chess/game";
+import Game, { GameStatus } from "../shared/chess/game";
 import Move from "../shared/chess/move";
 import Person, { PersonRole } from "../shared/chess/person";
 import { OPPOSITE_SIDE } from "../shared/constants";
@@ -15,10 +15,15 @@ import {
   MAKE_MOVE_EVENT,
   READY_EVENT,
   USER_ID_EVENT,
+  CREATE_GAME_EVENT,
+  GAME_EXPIRED_EVENT,
 } from "../shared/events";
 import { findGamePersonIsIn } from "./helpers";
 import state from "./state";
 import { validateJoinGameData } from "./validation";
+
+// const GAME_EXPIRE_TIME = 1000 * 60 * 60 * 12; // 12 hours
+const GAME_EXPIRE_TIME = 5000;
 
 export default function registerSocketListeners(io: Server): void {
   io.on("connection", (socket: Socket) => {
@@ -34,6 +39,24 @@ export default function registerSocketListeners(io: Server): void {
       const gameJson = serialize(state.games[gameId]);
       io.to(gameId).emit(GAME_UPDATE_EVENT, gameJson);
     }
+
+    socket.on(CREATE_GAME_EVENT, (callback) => {
+      console.log("received create game event");
+
+      const gameId = uuidV4();
+      state.games[gameId] = new Game();
+
+      // TODO: this isn't fireing...
+      setTimeout(() => {
+        console.log(`Game ${gameId} expired`);
+        if (state.games[gameId]) {
+          socket.to(gameId).emit(GAME_EXPIRED_EVENT);
+          delete state.games[gameId];
+        }
+      }, GAME_EXPIRE_TIME);
+
+      callback(gameId);
+    });
 
     socket.on(JOIN_GAME_EVENT, (data: JoinGameData) => {
       console.log("received join game event: ", data);
@@ -99,7 +122,6 @@ export default function registerSocketListeners(io: Server): void {
       console.log("User disconnected");
 
       const userId = state.socketInfo.get(socket)!.userId;
-
       if (!userId) return;
 
       const gameId = findGamePersonIsIn(userId);
@@ -109,7 +131,10 @@ export default function registerSocketListeners(io: Server): void {
 
       emitGameUpdate(gameId);
 
-      // TODO: Delete games after 24 hours
+      // Delete game if empty
+      if (state.games[gameId].people.size == 0) {
+        delete state.games[gameId];
+      }
     });
   });
 }
