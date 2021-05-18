@@ -2,8 +2,8 @@
 
 ## TODO
 
-- Checkmate
 - CI build & deploy system
+- Timer
 - Responsive design / PWA
 - Chat
 
