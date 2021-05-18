@@ -2,7 +2,6 @@
 
 ## TODO
 
-- Terser remove console
 - Checkmate
 - CI build & deploy system
 - Responsive design / PWA
