@@ -12,6 +12,8 @@ Vue.use(VueSocketIO, socket, { store });
 
 axios.defaults.baseURL = "/api";
 
+if (process.env.NODE_ENV == "development") localStorage.debug = "*";
+
 new Vue({
   router,
   store,

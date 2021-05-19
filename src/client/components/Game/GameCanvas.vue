@@ -49,8 +49,7 @@ export default class GameCanvas extends Vue {
       // p5 Functions
       // ------------
       p.setup = () => {
-        const canvas = p.createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
-        canvas.parent("canvas-container");
+        p.createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
       };
 
       p.draw = () => {
@@ -345,7 +344,8 @@ export default class GameCanvas extends Vue {
 
         p.pop();
       };
-    });
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    }, document.getElementById("canvas-container")!);
   }
 }
 </script>

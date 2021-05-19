@@ -1,10 +1,12 @@
 <template>
   <div id="game">
     <header>
-      <p id="oppoennt-name">{{ opponentName }}</p>
-      <p style="width: 100%; text-align: center">
-        You're {{ myIdentity }} | {{ statusMsg }}
-      </p>
+      <div class="status-bar">
+        <p id="oppoennt-name">{{ opponentName }}</p>
+        <div class="spacer"></div>
+        <p>You're {{ myIdentity }} | {{ statusMsg }}</p>
+        <div class="spacer"></div>
+      </div>
     </header>
     <aside id="left-sidebar">
       <h2>Stuff</h2>
@@ -14,14 +16,32 @@
     <GameCanvas />
     <aside id="right-sidebar">
       <h2>Chat</h2>
-      <p>Coming soon</p>
+      <div id="chat-messages">
+        <div v-for="(msg, index) in chatMessages" :key="index">
+          <p>
+            <strong>{{ msg.name }}:</strong> {{ msg.message }}
+          </p>
+        </div>
+      </div>
+      <div id="chat-input-bar">
+        <input
+          type="text"
+          style="flex-grow: 1; margin-right: 5px"
+          v-model="currentlyTypingMessage"
+          @keyup.enter="sendMessage"
+        />
+        <button @click="sendMessage">Send</button>
+      </div>
     </aside>
     <footer>
-      <p style="float: left">
-        Game link:
-        <a :href="joinUrl" @click.prevent="copyJoinUrl">{{ joinUrl }}</a>
-      </p>
-      <p id="my-name">{{ myName }}</p>
+      <div class="status-bar">
+        <p>
+          Game link:
+          <a :href="joinUrl" @click.prevent="copyJoinUrl">{{ joinUrl }}</a>
+        </p>
+        <div class="spacer"></div>
+        <p id="my-name">{{ myName }}</p>
+      </div>
     </footer>
   </div>
 </template>
@@ -30,7 +50,12 @@
 import { Component, Vue } from "vue-property-decorator";
 import GameCanvas from "../components/Game/GameCanvas.vue";
 import { namespace } from "vuex-class";
-import { GAME_STATUS_CHANGED_EVENT } from "../../shared/events";
+import {
+  GAME_STATUS_CHANGED_EVENT,
+  MessageData,
+  MESSAGE_EVENT,
+  SEND_MESSAGE_EVENT,
+} from "../../shared/events";
 import Game from "../../shared/chess/game";
 
 const gameState = namespace("gameState");
@@ -38,11 +63,11 @@ const gameState = namespace("gameState");
 @Component({
   components: { GameCanvas },
   sockets: {
-    [GAME_STATUS_CHANGED_EVENT]: function (
-      this: GameComponent
-      // _newStatus: GameStatus
-    ) {
+    [GAME_STATUS_CHANGED_EVENT]: function (this: GameComponent) {
       alert(this.game?.statusMsg);
+    },
+    [MESSAGE_EVENT]: function (this: GameComponent, data: MessageData) {
+      this.chatMessages.push(data);
     },
   },
 })
@@ -55,6 +80,9 @@ export default class GameComponent extends Vue {
   @gameState.Getter joinUrl!: string | undefined;
   @gameState.State game!: Game | null;
 
+  chatMessages: MessageData[] = [];
+  currentlyTypingMessage = "";
+
   // Hooks
   created(): void {
     if (!this.game) {
@@ -64,6 +92,15 @@ export default class GameComponent extends Vue {
   }
 
   // Methods
+  sendMessage(): void {
+    const msg = this.currentlyTypingMessage.trim();
+    console.log(`Sending message ${msg}`);
+    console.log(`Message length: ${msg.length}`);
+    if (msg.length == 0) return;
+    this.$socket.client.emit(SEND_MESSAGE_EVENT, msg);
+    this.currentlyTypingMessage = "";
+  }
+
   leaveGamePressed(): void {
     console.log("Leave game pressed");
     this.$socket.client.disconnect();
@@ -87,11 +124,12 @@ export default class GameComponent extends Vue {
 /* Grid */
 #game {
   display: grid;
-  grid-template-columns: 1fr 4fr 1fr;
+  grid-template-columns: 1fr 3fr 1fr;
+  grid-template-rows: 4em auto 4em;
+  height: 100vh;
   grid-template-areas:
     "header header  header"
-    "left   canvas right"
-    "left   canvas right"
+    "left   canvas  right"
     "footer footer  footer";
 }
 
@@ -105,6 +143,13 @@ export default class GameComponent extends Vue {
   padding: 0px 10px 0px 10px;
   border-top: 1px solid gray;
 }
+#game > footer,
+#game > header {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 #left-sidebar {
   grid-area: left;
   padding: 10px;
@@ -114,6 +159,17 @@ export default class GameComponent extends Vue {
   grid-area: right;
   padding: 10px;
   border-left: 1px solid gray;
+  display: flex;
+  flex-direction: column;
+}
+
+.status-bar {
+  width: 100%;
+  display: flex;
+}
+
+.spacer {
+  flex-grow: 1;
 }
 
 /* Misc */
@@ -133,5 +189,19 @@ export default class GameComponent extends Vue {
   border-left: 1px solid gray;
   float: right;
   padding-left: 10px;
+}
+
+/* Chat */
+#chat-messages {
+  overflow: scroll;
+  flex-grow: 1;
+  height: 0;
+}
+#chat-input-bar {
+  display: flex;
+  flex-direction: horizontal;
+  width: 100%;
+  height: 2em;
+  margin-top: 10px;
 }
 </style>

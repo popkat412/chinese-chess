@@ -1,11 +1,17 @@
 import { deserialize } from "class-transformer";
 import { Socket } from "socket.io-client";
+import VueSocketIOExt from "vue-socket.io-extended";
 import { Module } from "vuex";
 import type { RootState } from ".";
 import Game from "../../shared/chess/game";
 import Person, { PersonRole } from "../../shared/chess/person";
 import { PieceSide } from "../../shared/chess/piece";
-import { JoinGameData, JOIN_GAME_EVENT } from "../../shared/events";
+import {
+  GAME_UPDATE_EVENT,
+  JoinGameData,
+  JOIN_GAME_EVENT,
+  USER_ID_EVENT,
+} from "../../shared/events";
 
 export interface GameState {
   game: Game | null;
@@ -16,6 +22,14 @@ export interface GameState {
 export interface JoinGameActionPayload {
   data: JoinGameData;
   socket: Socket;
+}
+
+function mutationify(eventName: string): string {
+  const defaults = VueSocketIOExt.defaults;
+  return (
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    defaults.mutationPrefix + defaults.eventToMutationTransformer!(eventName)
+  );
 }
 
 const gameState: Module<GameState, RootState> = {
@@ -34,10 +48,10 @@ const gameState: Module<GameState, RootState> = {
       state.gameId = null;
       state.myUserId = null;
     },
-    SOCKET_USER_ID(state, payload: string): void {
+    [mutationify(USER_ID_EVENT)]: function (state, payload: string): void {
       state.myUserId = payload;
     },
-    SOCKET_GAME_UPDATE(state, payload: string): void {
+    [mutationify(GAME_UPDATE_EVENT)]: function (state, payload: string): void {
       state.game = deserialize(Game, payload);
     },
   },

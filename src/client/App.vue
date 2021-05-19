@@ -7,32 +7,45 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import { namespace } from "vuex-class";
-import { READY_EVENT } from "../shared/events";
+import { ERROR_EVENT, READY_EVENT } from "../shared/events";
+import { Socket as SocketDecorator } from "vue-socket.io-extended";
 
 const gameState = namespace("gameState");
 
-@Component({
-  // Most of the generic socket stuff will be under APp
-  sockets: {
-    connect() {
-      console.log("🔌 socket conencted");
-    },
-    disconnect() {
-      console.log("🔌 socket disconnected");
-      this.$store.commit("gameState/reset");
-    },
-    [READY_EVENT]: function (this: App): void {
-      this.$router.push({
-        path: "/game",
-        // By the time the READY event is sent, the gameId should have already been sent over
-        query: this.gameId ? { gameId: this.gameId } : {},
-      });
-    },
-  },
-})
+@Component
 export default class App extends Vue {
+  // Vuex
   @gameState.State gameId!: string | null;
 
+  // Sockets
+  @SocketDecorator()
+  connect(): void {
+    console.log("🔌 socket conencted");
+  }
+
+  @SocketDecorator()
+  disconnect(): void {
+    console.log("🔌 socket disconnected");
+    this.$store.commit("gameState/reset");
+  }
+
+  @SocketDecorator(READY_EVENT)
+  onReadyEvent(this: App): void {
+    console.log("ready event");
+    this.$router.push({
+      path: "/game",
+      // By the time the READY event is sent, the gameId should have already been sent over
+      query: this.gameId ? { gameId: this.gameId } : {},
+    });
+  }
+
+  @SocketDecorator(ERROR_EVENT)
+  onErrorEvent(errorMsg: string): void {
+    console.log("showing error alert...");
+    alert(errorMsg);
+  }
+
+  // Hooks
   created(): void {
     this.$socket.client.onAny((event, args) => {
       console.info(event, args);
@@ -40,8 +53,7 @@ export default class App extends Vue {
   }
 
   beforeDestroy(): void {
-    this.$socket.$unsubscribe(READY_EVENT);
-    this.$socket.client.off();
+    this.$socket.client.offAny();
   }
 }
 </script>
@@ -56,6 +68,7 @@ body {
   padding: 0px;
   height: 100vh;
   width: 100vw;
+  overflow: hidden;
 }
 
 #app {

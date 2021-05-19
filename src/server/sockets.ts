@@ -17,20 +17,24 @@ import {
   USER_ID_EVENT,
   CREATE_GAME_EVENT,
   GAME_EXPIRED_EVENT,
+  SEND_MESSAGE_EVENT,
+  MESSAGE_EVENT,
+  MessageData,
 } from "../shared/events";
 import { findGamePersonIsIn } from "./helpers";
 import state from "./state";
 import { validateJoinGameData } from "./validation";
 
-// const GAME_EXPIRE_TIME = 1000 * 60 * 60 * 12; // 12 hours
-const GAME_EXPIRE_TIME = 5000;
+const GAME_EXPIRE_TIME = 1000 * 60 * 60 * 12; // 12 hours
+// const GAME_EXPIRE_TIME = 5000;
 
 export default function registerSocketListeners(io: Server): void {
   io.on("connection", (socket: Socket) => {
     console.log("User connected");
     state.socketInfo.set(socket, {});
 
-    function error(message: string, disconnect = false) {
+    function sendError(message: string, disconnect = false) {
+      console.info(`error: ${message}`);
       socket.emit(ERROR_EVENT, message);
       if (disconnect) socket.disconnect();
     }
@@ -40,13 +44,16 @@ export default function registerSocketListeners(io: Server): void {
       io.to(gameId).emit(GAME_UPDATE_EVENT, gameJson);
     }
 
+    socket.onAny((event, args) => {
+      console.info(event, args);
+    });
+
     socket.on(CREATE_GAME_EVENT, (callback) => {
       console.log("received create game event");
 
       const gameId = uuidV4();
       state.games[gameId] = new Game();
 
-      // TODO: this isn't fireing...
       setTimeout(() => {
         console.log(`Game ${gameId} expired`);
         if (state.games[gameId]) {
@@ -63,7 +70,7 @@ export default function registerSocketListeners(io: Server): void {
 
       const validationResult = validateJoinGameData(data);
       if (!validationResult.valid) {
-        error(validationResult.errorMessage);
+        sendError(validationResult.errorMessage);
         return;
       }
 
@@ -86,7 +93,7 @@ export default function registerSocketListeners(io: Server): void {
       const userId = state.socketInfo.get(socket)!.userId!;
       const gameId = findGamePersonIsIn(userId);
       if (!gameId) {
-        error("Cannot find game with player");
+        sendError("Cannot find game with player");
         return;
       }
 
@@ -99,7 +106,7 @@ export default function registerSocketListeners(io: Server): void {
         person.role != PersonRole.Player ||
         person.side != game.board.currentSide
       ) {
-        error("Illegal move");
+        sendError("Illegal move");
         return;
       }
 
@@ -118,6 +125,32 @@ export default function registerSocketListeners(io: Server): void {
       }
     });
 
+    socket.on(SEND_MESSAGE_EVENT, (msg: string) => {
+      const userId = state.socketInfo.get(socket)?.userId ?? "";
+      const gameId = findGamePersonIsIn(userId);
+      if (!gameId) return;
+
+      if (typeof msg != "string") {
+        sendError("FATAL: Message isn't a string");
+        return;
+      }
+
+      if (msg.length > 255) {
+        sendError("Message can't be longer than 255 characters");
+        return;
+      }
+
+      if (msg.length == 0) return;
+
+      const name = state.games[gameId].people.get(userId)?.name;
+      if (!name) return;
+      const data: MessageData = {
+        name: name,
+        message: msg,
+      };
+      io.to(gameId).emit(MESSAGE_EVENT, data);
+    });
+
     socket.on("disconnect", () => {
       console.log("User disconnected");
 
@@ -133,6 +166,7 @@ export default function registerSocketListeners(io: Server): void {
 
       // Delete game if empty
       if (state.games[gameId].people.size == 0) {
+        console.log(`Deleteing game: ${gameId}`);
         delete state.games[gameId];
       }
     });
