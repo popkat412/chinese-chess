@@ -3,12 +3,11 @@
 ## TODO
 
 - CI build & deploy system
-- Remove blocking `alert()`s
+- Confirm before leave game
 - Respond to game expired event in UI
 - Draw / 3 fold repetition
 - Timer
 - Responsive design / PWA
-- Chat
 - Premoves
 - Track list of moves & move back / forward in time
 - Analysis & AI (???)

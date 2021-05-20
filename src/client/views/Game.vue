@@ -64,6 +64,7 @@ const gameState = namespace("gameState");
   components: { GameCanvas },
   sockets: {
     [GAME_STATUS_CHANGED_EVENT]: function (this: GameComponent) {
+      // TODO: Change this to modal
       alert(this.game?.statusMsg);
     },
     [MESSAGE_EVENT]: function (this: GameComponent, data: MessageData) {
@@ -110,7 +111,7 @@ export default class GameComponent extends Vue {
   async copyJoinUrl(): Promise<void> {
     if (!this.joinUrl) return;
     await navigator.clipboard.writeText(this.joinUrl);
-    alert("Copied to clipboard!");
+    this.$notify({ text: "Copied to clipboard!" });
   }
 
   // Getters

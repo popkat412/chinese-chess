@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <notifications position="top right" />
     <router-view />
   </div>
 </template>
@@ -12,10 +13,11 @@ import { Socket as SocketDecorator } from "vue-socket.io-extended";
 
 const gameState = namespace("gameState");
 
-@Component
+@Component({})
 export default class App extends Vue {
   // Vuex
   @gameState.State gameId!: string | null;
+  toastMessage: string | undefined = "test";
 
   // Sockets
   @SocketDecorator()
@@ -42,7 +44,11 @@ export default class App extends Vue {
   @SocketDecorator(ERROR_EVENT)
   onErrorEvent(errorMsg: string): void {
     console.log("showing error alert...");
-    alert(errorMsg);
+    this.$notify({
+      title: "Error",
+      text: errorMsg,
+      type: "error",
+    });
   }
 
   // Hooks

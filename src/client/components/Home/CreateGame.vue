@@ -50,7 +50,7 @@ export default class CreateGame extends Vue {
     // Validate form inputs
     const nicknameValidation = validateNickname(this.name);
     if (nicknameValidation != true) {
-      alert(nicknameValidation);
+      this.$notify({ type: "error", title: "Error", text: nicknameValidation });
       return;
     }
 
@@ -72,7 +72,11 @@ export default class CreateGame extends Vue {
       this.$store.dispatch("gameState/joinGame", payload);
     } catch (e) {
       console.error(e);
-      alert(`Error creating game: ${e}`);
+      this.$notify({
+        type: "error",
+        title: "Error",
+        text: `Error creating game: ${e}`,
+      });
       return;
     }
   }

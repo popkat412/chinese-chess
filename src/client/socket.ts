@@ -9,10 +9,4 @@ const socket = io(
   { autoConnect: false }
 );
 
-// Debugging only, remove plz
-// socket.on(ERROR_EVENT, (errMsg: string) => {
-//   console.log("showing alert...");
-//   alert(errMsg);
-// });
-
 export default socket;

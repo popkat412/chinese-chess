@@ -65,7 +65,11 @@ export default class JoinGame extends Vue {
   async joinGamePressed(): Promise<void> {
     // Validate form inputs
     if (this.gameId.trim() == "") {
-      alert("Game ID is required");
+      this.$notify({
+        type: "error",
+        title: "Error",
+        text: "Game ID is required",
+      });
       return;
     }
 
@@ -84,7 +88,11 @@ export default class JoinGame extends Vue {
     ).data;
 
     if (!res.valid) {
-      alert(`Error: ${res.errorMessage}`);
+      this.$notify({
+        type: "error",
+        title: "Error",
+        text: `Error: ${res.errorMessage}`,
+      });
       return;
     }
 
